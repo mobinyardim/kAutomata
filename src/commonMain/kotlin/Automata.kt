@@ -8,9 +8,9 @@ fun <T> Edge<T>.next(transition: T): Set<State>? {
     return this[transition]
 }
 
-abstract class Automata<T : Enum<T>> {
+abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
 
-    private val states: MutableSet<State> = mutableSetOf()
+    private val states: MutableSet<State> = mutableSetOf(startState)
     fun addState(state: State): State {
         if (containsState(state)) {
             throw DuplicatedStateException(state)
