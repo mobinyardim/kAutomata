@@ -58,6 +58,39 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     fun containsEdge(start: State, transition: T, endState: State): Boolean {
         return (edges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id } ?: false
     }
+
+    fun trace(string: List<T>, automataStateTracer: AutomataStateTracer<T>) {
+        automataStateTracer.onStart()
+
+        trace(string, automataStateTracer, startState)
+    }
+
+
+    private fun trace(string: List<T>, automataStateTracer: AutomataStateTracer<T>, currentState: State) {
+        automataStateTracer.onCurrentStateChange(currentState)
+
+        if (string.isEmpty()) {
+            if (currentState.isFinal) {
+                automataStateTracer.onFinalState(currentState)
+            } else {
+                automataStateTracer.onTrap(currentState, string)
+            }
+        } else {
+            val firstCharacter = string.first()
+            val nextStates = edges[currentState]?.next(firstCharacter)
+            if (nextStates.isNullOrEmpty()) {
+                automataStateTracer.onTrap(currentState, string)
+            } else {
+                nextStates.forEach {
+                    trace(
+                        string = string.subList(1, string.size),
+                        automataStateTracer = automataStateTracer,
+                        currentState = it
+                    )
+                }
+            }
+        }
+    }
 }
 
 
