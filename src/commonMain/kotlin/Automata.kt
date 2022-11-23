@@ -36,8 +36,8 @@ abstract class Automata<T : Enum<T>> {
         val stateEdges = edges[startState]?.toMutableMap() ?: mutableMapOf()
         val newEdges = stateEdges[transition]?.toMutableSet() ?: mutableSetOf()
 
-        //If already there is a transition then return
-        if (newEdges.contains(endState)) {
+        //If already there is a transition then throw exception
+        if (newEdges.any { endState.id == it.id }) {
             throw DuplicatedEdgeException(
                 startState, transition.name, endState
             )
