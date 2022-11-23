@@ -1,3 +1,5 @@
 package exceptions
 
-class DuplicatedStateException(stateName: String) : Exception("$stateName already exist!")
+import State
+
+class DuplicatedStateException(state: State) : Exception("There is state with ${state.id} already exist!")
