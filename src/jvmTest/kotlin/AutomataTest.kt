@@ -81,4 +81,43 @@ internal class AutomataTest {
 
         assertThat(automata.getState(stateId)).isEqualTo(state)
     }
+
+    @Test
+    fun `addEdge when edges empty must correctly add edge`() {
+        val automata = object : Automata<Language>() {}
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition = Language.A
+        automata.addEdge(state1, transition, state2)
+
+        assertThat(
+            automata.containsEdge(
+                state1,
+                transition,
+                state2
+            )
+        ).isTrue()
+    }
+
+
 }
