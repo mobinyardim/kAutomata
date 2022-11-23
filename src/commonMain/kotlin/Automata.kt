@@ -6,8 +6,8 @@ abstract class Automata<T : Enum<T>> {
 
     private val states: MutableSet<State> = mutableSetOf()
     fun addState(state: State): State {
-        if (states.contains(state)) {
-            throw DuplicatedStateException(state.name)
+        if (contains(state)) {
+            throw DuplicatedStateException(state)
         }
         states.add(state)
         return state
@@ -15,6 +15,10 @@ abstract class Automata<T : Enum<T>> {
 
     fun getState(stateId: Int): State? {
         return states.firstOrNull { it.id == stateId }
+    }
+
+    fun contains(state: State): Boolean {
+        return states.firstOrNull { it.id == state.id } != null
     }
 
     private val edges: MutableMap<State, Map<T, Set<State>>> = mutableMapOf()
