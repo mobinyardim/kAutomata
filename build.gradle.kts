@@ -35,7 +35,14 @@ kotlin {
         else -> throw GradleException("Host OS is not supported in Kotlin/Native.")
     }
 
-    
+    nativeTarget.apply {
+        binaries {
+            executable {
+                entryPoint = "main"
+            }
+        }
+    }
+
     sourceSets {
         val commonMain by getting
         val commonTest by getting {
@@ -50,4 +57,18 @@ kotlin {
         val nativeMain by getting
         val nativeTest by getting
     }
+}
+
+
+tasks.register(name = "runApp", type = Exec::class) {
+    group = "run"
+    dependsOn("runDebugExecutableNative")
+    workingDir("$buildDir/bin/native/debugExecutable")
+    commandLine(
+        if (System.getProperty("os.name").toLowerCase().contains("windows")) {
+            "${project.name}.exe"
+        } else{
+            "./${project.name}.kexe"
+        }
+    )
 }
