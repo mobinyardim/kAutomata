@@ -60,7 +60,7 @@ kotlin {
 }
 
 
-tasks.register(name = "runApp", type = Exec::class) {
+tasks.register(name = "runNativeApp", type = Exec::class) {
     group = "run"
     dependsOn("runDebugExecutableNative")
     workingDir("$buildDir/bin/native/debugExecutable")
