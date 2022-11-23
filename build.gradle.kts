@@ -48,6 +48,7 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
+                implementation ("com.google.truth:truth:1.1.3")
             }
         }
         val jvmMain by getting
