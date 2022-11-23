@@ -50,6 +50,8 @@ kotlin {
                 implementation(kotlin("test"))
                 implementation ("com.google.truth:truth:1.1.3")
                 implementation ("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
+                implementation("org.mockito.kotlin:mockito-core:4.0.0")
+                implementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
             }
         }
         val jvmMain by getting
