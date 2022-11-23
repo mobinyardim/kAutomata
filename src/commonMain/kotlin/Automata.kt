@@ -12,7 +12,7 @@ abstract class Automata<T : Enum<T>> {
 
     private val states: MutableSet<State> = mutableSetOf()
     fun addState(state: State): State {
-        if (contains(state)) {
+        if (containsState(state)) {
             throw DuplicatedStateException(state)
         }
         states.add(state)
@@ -23,17 +23,17 @@ abstract class Automata<T : Enum<T>> {
         return states.firstOrNull { it.id == stateId }
     }
 
-    fun contains(state: State): Boolean {
+    fun containsState(state: State): Boolean {
         return states.firstOrNull { it.id == state.id } != null
     }
 
     private val edges: MutableMap<State, Edge<T>> = mutableMapOf()
 
     open fun addEdge(startState: State, transition: T, endState: State) {
-        if (!contains(startState) || !contains(endState))
+        if (!containsState(startState) || !containsState(endState))
             throw NoSuchStateException()
 
-        if (contains(startState, transition, endState)) {
+        if (containsEdge(startState, transition, endState)) {
             throw DuplicatedEdgeException(
                 startState, transition.name, endState
             )
@@ -55,7 +55,7 @@ abstract class Automata<T : Enum<T>> {
         }
     }
 
-    fun contains(start: State, transition: T, endState: State): Boolean {
+    fun containsEdge(start: State, transition: T, endState: State): Boolean {
         return (edges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id } ?: false
     }
 }
