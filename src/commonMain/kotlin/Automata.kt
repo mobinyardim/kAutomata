@@ -13,6 +13,10 @@ abstract class Automata<T : Enum<T>> {
         return state
     }
 
+    fun getState(stateId: Int): State? {
+        return states.firstOrNull { it.id == stateId }
+    }
+
     private val edges: MutableMap<State, Map<T, Set<State>>> = mutableMapOf()
     open fun addEdge(startState: State, transition: T, endState: State) {
         if (!states.contains(startState) || !states.contains(endState))
