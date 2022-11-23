@@ -27,15 +27,15 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         return states.firstOrNull { it.id == state.id } != null
     }
 
-    private val edges: MutableMap<State, Edge<T>> = mutableMapOf()
+    private val edges: MutableMap<State, Edge<T?>> = mutableMapOf()
 
-    open fun addEdge(startState: State, transition: T, endState: State) {
+    open fun addEdge(startState: State, transition: T?, endState: State) {
         if (!containsState(startState) || !containsState(endState))
             throw NoSuchStateException()
 
         if (containsEdge(startState, transition, endState)) {
             throw DuplicatedEdgeException(
-                startState, transition.name, endState
+                startState, transition?.name ?: "lambda", endState
             )
         }
 
@@ -55,7 +55,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         }
     }
 
-    fun containsEdge(start: State, transition: T, endState: State): Boolean {
+    fun containsEdge(start: State, transition: T?, endState: State): Boolean {
         return (edges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id } ?: false
     }
 
