@@ -1,3 +1,4 @@
+import exceptions.DuplicatedEdgeException
 import exceptions.DuplicatedStateException
 import exceptions.NoSuchStateException
 
@@ -22,15 +23,18 @@ abstract class Automata<T : Enum<T>> {
 
         //If already there is a transition then return
         if (newEdges.contains(endState)) {
-            return
+            throw DuplicatedEdgeException(
+                startState, transition.name, endState
+            )
         }
+
         newEdges.add(endState)
         stateEdges[transition] = newEdges
 
         if (edges[startState]?.contains(transition) == true) {
             edges.remove(startState)
             edges[startState] = stateEdges
-        }else{
+        } else {
             edges[startState] = stateEdges
         }
     }
