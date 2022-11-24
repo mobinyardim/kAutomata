@@ -83,6 +83,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
                 automataStateTracer.onTrap(currentState, string)
             } else {
                 nextStates.forEach {
+                    automataStateTracer.onTransition(currentState, firstCharacter, it)
                     trace(
                         string = string.subList(1, string.size),
                         automataStateTracer = automataStateTracer,
@@ -90,8 +91,9 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
                     )
                 }
             }
-            if(!nextStatesWithLambda.isNullOrEmpty()){
+            if (!nextStatesWithLambda.isNullOrEmpty()) {
                 nextStatesWithLambda.forEach {
+                    automataStateTracer.onTransition(currentState, null, it)
                     trace(
                         string = string,
                         automataStateTracer = automataStateTracer,
