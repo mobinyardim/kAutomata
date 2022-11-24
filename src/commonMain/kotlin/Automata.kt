@@ -78,12 +78,22 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         } else {
             val firstCharacter = string.first()
             val nextStates = edges[currentState]?.next(firstCharacter)
+            val nextStatesWithLambda = edges[currentState]?.next(null)
             if (nextStates.isNullOrEmpty()) {
                 automataStateTracer.onTrap(currentState, string)
             } else {
                 nextStates.forEach {
                     trace(
                         string = string.subList(1, string.size),
+                        automataStateTracer = automataStateTracer,
+                        currentState = it
+                    )
+                }
+            }
+            if(!nextStatesWithLambda.isNullOrEmpty()){
+                nextStatesWithLambda.forEach {
+                    trace(
+                        string = string,
                         automataStateTracer = automataStateTracer,
                         currentState = it
                     )
