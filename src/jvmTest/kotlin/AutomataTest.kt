@@ -216,6 +216,8 @@ internal class AutomataTest {
 
             override fun onFinalState(state: State) {}
 
+            override fun onTransition(start: State, transition: Language?, endState: State) {}
+
             override fun onTrap(state: State, notConsumedString: List<Language>) {}
 
         })
@@ -268,6 +270,8 @@ internal class AutomataTest {
 
             override fun onFinalState(state: State) {}
 
+            override fun onTransition(start: State, transition: Language?, endState: State) {}
+
             override fun onTrap(state: State, notConsumedString: List<Language>) {}
 
         })
@@ -309,6 +313,8 @@ internal class AutomataTest {
                 onFinalState.invoke(state)
             }
 
+            override fun onTransition(start: State, transition: Language?, endState: State) {}
+
             override fun onTrap(state: State, notConsumedString: List<Language>) {}
 
         })
@@ -348,6 +354,8 @@ internal class AutomataTest {
 
             override fun onFinalState(state: State) {
             }
+
+            override fun onTransition(start: State, transition: Language?, endState: State) {}
 
             override fun onTrap(state: State, notConsumedString: List<Language>) {
                 onTrap.invoke(state)
