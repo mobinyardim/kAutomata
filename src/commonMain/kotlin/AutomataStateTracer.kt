@@ -6,4 +6,6 @@ interface AutomataStateTracer<T> {
     fun onFinalState(state: State)
 
     fun onTrap(state: State, notConsumedString: List<T>)
+
+    fun onTransition(start: State, transition: T?, endState: State)
 }
