@@ -91,7 +91,7 @@ internal class AutomataTest {
 
     @Test
     fun `addEdge when edges empty must correctly add edge`() {
-        val automata = object : Automata<Language>() {}
+        val automata = NFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -128,7 +128,7 @@ internal class AutomataTest {
 
     @Test
     fun `addEdge when state have edge must add another edge`() {
-        val automata = object : Automata<Language>() {}
+        val automata = NFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -176,7 +176,7 @@ internal class AutomataTest {
 
     @Test
     fun `trace when called onStart must call just one time`() {
-        val automata = object : Automata<Language>() {}
+        val automata = NFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -237,7 +237,7 @@ internal class AutomataTest {
             isFinal = isFinalState1
         )
 
-        val automata = object : Automata<Language>(state1) {}
+        val automata = NFA<Language>(state1)
 
         val stateId2 = 2
         val stateName2 = "s2"
