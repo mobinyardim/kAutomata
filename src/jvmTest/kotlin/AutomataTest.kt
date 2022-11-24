@@ -279,4 +279,45 @@ internal class AutomataTest {
             assertThat(firstValue).isEqualTo(state1)
         }
     }
+
+    @Test
+    fun `trace when called and there is just one state and state is final onFinalState must called `() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = true
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val automata = object : Automata<Language>(state1) {}
+
+        val onStart = mock<() -> Unit> { on { invoke() }.doReturn(Unit) }
+        val onFinalState = mock<(state: State) -> Unit> { on { invoke(any()) }.doReturn(Unit) }
+
+        automata.trace("".toEnumList(), automataStateTracer = object : AutomataStateTracer<Language> {
+            override fun onStart() {
+                onStart.invoke()
+            }
+
+            override fun onCurrentStateChange(state: State) {
+            }
+
+            override fun onFinalState(state: State) {
+                onFinalState.invoke(state)
+            }
+
+            override fun onTrap(state: State, notConsumedString: List<Language>) {}
+
+        })
+
+        verify(onStart, times(1)).invoke()
+
+        argumentCaptor<State>().apply {
+            verify(onFinalState, times(1)).invoke(capture())
+            assertThat(firstValue).isEqualTo(state1)
+        }
+    }
 }
