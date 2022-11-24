@@ -2,6 +2,8 @@ import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
 import exceptions.DuplicatedStateException
 import org.junit.jupiter.api.assertThrows
+import org.mockito.kotlin.*
+import utils.toEnumList
 
 internal class AutomataTest {
 
@@ -172,4 +174,109 @@ internal class AutomataTest {
         ).isTrue()
     }
 
+    @Test
+    fun `trace when called onStart must call just one time`() {
+        val automata = object : Automata<Language>() {}
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        val transition2 = Language.b
+
+        automata.addEdge(state1, transition1, state2)
+        automata.addEdge(state1, transition2, state2)
+
+        val onStart = mock<() -> Unit> { on { invoke() }.doReturn(Unit) }
+
+        automata.trace("aa".toEnumList(), automataStateTracer = object : AutomataStateTracer<Language> {
+            override fun onStart() {
+                onStart.invoke()
+            }
+
+            override fun onCurrentStateChange(state: State) {}
+
+            override fun onFinalState(state: State) {}
+
+            override fun onTrap(state: State, notConsumedString: List<Language>) {}
+
+        })
+
+        verify(onStart, times(1)).invoke()
+    }
+
+    @Test
+    fun `trace when called current state in first time must be first state`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val automata = object : Automata<Language>(state1) {}
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        val transition2 = Language.b
+
+        automata.addEdge(state1, transition1, state2)
+        automata.addEdge(state1, transition2, state2)
+
+        val onStart = mock<() -> Unit> { on { invoke() }.doReturn(Unit) }
+        val onCurrentStateChange = mock<(state: State) -> Unit> { on { invoke(any()) }.doReturn(Unit) }
+
+        automata.trace("aa".toEnumList(), automataStateTracer = object : AutomataStateTracer<Language> {
+            override fun onStart() {
+                onStart.invoke()
+            }
+
+            override fun onCurrentStateChange(state: State) {
+                onCurrentStateChange.invoke(state)
+            }
+
+            override fun onFinalState(state: State) {}
+
+            override fun onTrap(state: State, notConsumedString: List<Language>) {}
+
+        })
+
+        verify(onStart, times(1)).invoke()
+
+        argumentCaptor<State>().apply {
+            verify(onCurrentStateChange, atLeast(1)).invoke(capture())
+            assertThat(firstValue).isEqualTo(state1)
+        }
+    }
 }
