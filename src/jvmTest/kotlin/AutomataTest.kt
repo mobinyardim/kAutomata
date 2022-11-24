@@ -6,8 +6,8 @@ import org.junit.jupiter.api.assertThrows
 internal class AutomataTest {
 
     enum class Language {
-        A,
-        B
+        a,
+        b
     }
 
     @Test
@@ -112,7 +112,7 @@ internal class AutomataTest {
         automata.addState(state = state1)
         automata.addState(state = state2)
 
-        val transition = Language.A
+        val transition = Language.a
         automata.addEdge(state1, transition, state2)
 
         assertThat(
@@ -149,8 +149,8 @@ internal class AutomataTest {
         automata.addState(state = state1)
         automata.addState(state = state2)
 
-        val transition1 = Language.A
-        val transition2 = Language.B
+        val transition1 = Language.a
+        val transition2 = Language.b
 
         automata.addEdge(state1, transition1, state2)
         automata.addEdge(state1, transition2, state2)
