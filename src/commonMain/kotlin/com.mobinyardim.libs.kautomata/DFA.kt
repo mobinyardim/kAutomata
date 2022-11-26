@@ -18,13 +18,13 @@ class DFA<T : Enum<T>>(
 
         stateEdges[transition] = endState
 
-        if (edges[startState]?.contains(transition) == true) {
-            edges.remove(startState)
-            edges[startState] = stateEdges.mapValues {
+        if (_edges[startState]?.contains(transition) == true) {
+            _edges.remove(startState)
+            _edges[startState] = stateEdges.mapValues {
                 setOf(it.value)
             }
         } else {
-            edges[startState] = stateEdges.mapValues {
+            _edges[startState] = stateEdges.mapValues {
                 setOf(it.value)
             }
         }

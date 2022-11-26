@@ -28,10 +28,13 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         return _states.firstOrNull { it.id == state.id } != null
     }
 
-    protected open val edges: MutableMap<State, Edge<T?>> = mutableMapOf()
+    @Suppress("PropertyName")
+    protected open val _edges: MutableMap<State, Edge<T?>> = mutableMapOf()
+    val edges: MutableMap<State, Edge<T?>>
+        get() = _edges
 
     fun containsEdge(start: State, transition: T?, endState: State): Boolean {
-        return (edges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id } ?: false
+        return (_edges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id } ?: false
     }
 
     fun trace(string: List<T>, automataStateTracer: AutomataStateTracer<T>) {
@@ -52,8 +55,8 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
             }
         } else {
             val firstCharacter = string.first()
-            val nextStates = edges[currentState]?.next(firstCharacter)
-            val nextStatesWithLambda = edges[currentState]?.next(null)
+            val nextStates = _edges[currentState]?.next(firstCharacter)
+            val nextStatesWithLambda = _edges[currentState]?.next(null)
             if (nextStates.isNullOrEmpty()) {
                 automataStateTracer.onTrap(currentState, string)
             } else {
