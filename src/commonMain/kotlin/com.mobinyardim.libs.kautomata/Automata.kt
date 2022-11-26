@@ -8,21 +8,24 @@ fun <T> Edge<T>.next(transition: T): Set<State>? {
 
 abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
 
-    private val states: MutableSet<State> = mutableSetOf(startState)
+    private val _states: MutableSet<State> = mutableSetOf(startState)
+    val states: Set<State>
+        get() = _states
+
     fun addState(state: State): State {
         if (containsState(state)) {
             throw DuplicatedStateException(state)
         }
-        states.add(state)
+        _states.add(state)
         return state
     }
 
     fun getState(stateId: Int): State? {
-        return states.firstOrNull { it.id == stateId }
+        return _states.firstOrNull { it.id == stateId }
     }
 
     fun containsState(state: State): Boolean {
-        return states.firstOrNull { it.id == state.id } != null
+        return _states.firstOrNull { it.id == state.id } != null
     }
 
     protected open val edges: MutableMap<State, Edge<T?>> = mutableMapOf()
