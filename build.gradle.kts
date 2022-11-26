@@ -4,11 +4,11 @@ plugins {
     id("maven-publish")
 }
 
-val libraryGroupId = "com.mobinyardim"
+val libraryGroupId = "com.mobinyardim.libs"
 val libraryArtifactId = "KAutomata"
 val libraryVersion = "0.1.0-alpha01"
 
-group = "com.mobinyardim"
+group = "com.mobinyardim.libs"
 version = "0.1.0-alpha01"
 
 artifactory {
@@ -89,6 +89,13 @@ kotlin {
     val publicationsFromMainHost = listOf(jvm(), js()).map { it.name } + "kotlinMultiplatform"
     publishing {
         publications {
+            afterEvaluate {
+                create<MavenPublication>("kAutomata"){
+                    groupId = libraryGroupId
+                    artifactId = libraryArtifactId
+                    version = libraryVersion
+                }
+            }
             matching { it.name in publicationsFromMainHost }.all {
                 val targetPublication = this@all
                 tasks.withType<AbstractPublishToMaven>()
