@@ -1,6 +1,4 @@
-import exceptions.DuplicatedEdgeException
-import exceptions.DuplicatedStateException
-import exceptions.NoSuchStateException
+package com.mobinyardim.libs.kautomata
 
 typealias Edge<T> = Map<T, Set<State>>
 

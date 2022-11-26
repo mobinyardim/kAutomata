@@ -1,3 +1,5 @@
+package com.mobinyardim.libs.kautomata
+
 interface AutomataStateTracer<T> {
     fun onStart()
 

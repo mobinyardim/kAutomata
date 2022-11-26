@@ -1,5 +1,4 @@
-import utils.toEnumList
-import utils.toText
+import com.mobinyardim.libs.kautomata.*
 
 fun main() {
 

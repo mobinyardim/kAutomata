@@ -1,4 +1,4 @@
-package utils
+package com.mobinyardim.libs.kautomata
 
 import org.junit.jupiter.api.Test
 

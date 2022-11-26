@@ -1,3 +1,6 @@
+import com.mobinyardim.libs.kautomata.NFA
+import com.mobinyardim.libs.kautomata.State
+
 fun main() {
 
     val nfa = NFA<Language>()

@@ -1,5 +1,4 @@
-import exceptions.DuplicatedEdgeException
-import exceptions.NoSuchStateException
+package com.mobinyardim.libs.kautomata
 
 class DFA<T : Enum<T>>(
     startState: State = State(0, "s0", false)

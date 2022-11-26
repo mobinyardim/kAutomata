@@ -1,9 +1,9 @@
+package com.mobinyardim.libs.kautomata
+
 import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
-import exceptions.DuplicatedStateException
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.*
-import utils.toEnumList
 
 internal class AutomataTest {
 
