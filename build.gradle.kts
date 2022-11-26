@@ -9,7 +9,7 @@ val libraryArtifactId = "KAutomata"
 val libraryVersion = "0.1.0-alpha01"
 
 group = "com.mobinyardim.libs"
-version = "0.1.0-alpha01"
+version = "0.1.0-alpha02"
 
 artifactory {
     setContextUrl("https://inbo.jfrog.io/artifactory")
