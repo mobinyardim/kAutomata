@@ -1,9 +1,34 @@
 plugins {
     kotlin("multiplatform") version "1.7.10"
+    id("com.jfrog.artifactory") version("4.28.2")
+    id("maven-publish")
 }
 
-group = "me.mobin"
-version = "1.0-SNAPSHOT"
+val libraryGroupId = "com.mobinyardim"
+val libraryArtifactId = "KAutomata"
+val libraryVersion = "0.1.0-alpha01"
+
+group = "com.mobinyardim"
+version = "0.1.0-alpha01"
+
+artifactory {
+    setContextUrl("https://inbo.jfrog.io/artifactory")
+    publish {
+        repository {
+            setRepoKey("inbo-public-repo")
+            setUsername(properties["artifactory_username"] as String)
+            setPassword(properties["artifactory_password"] as String)
+        }
+        defaults {
+            publications("aar")
+            setPublishArtifacts(true)
+            properties.put("qa.level", "basic")
+            properties.put("q.os", "android")
+            properties.put("dev.team", "core")
+            setPublishPom(true)
+        }
+    }
+}
 
 repositories {
     mavenCentral()
@@ -59,6 +84,28 @@ kotlin {
         val jsTest by getting
         val nativeMain by getting
         val nativeTest by getting
+    }
+
+    val publicationsFromMainHost = listOf(jvm(), js()).map { it.name } + "kotlinMultiplatform"
+    publishing {
+        publications {
+            matching { it.name in publicationsFromMainHost }.all {
+                val targetPublication = this@all
+                tasks.withType<AbstractPublishToMaven>()
+                    .matching { it.publication == targetPublication }
+                    .configureEach { onlyIf { findProperty("isMainHost") == "true" } }
+            }
+        }
+
+        repositories {
+            maven {
+                url = uri("https://inbo.jfrog.io/artifactory/inbo-public-repo/")
+                credentials {
+                    username = properties["artifactory_username"] as String
+                    password = properties["artifactory_password"] as String
+                }
+            }
+        }
     }
 }
 
