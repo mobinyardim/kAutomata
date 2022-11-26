@@ -8,27 +8,33 @@ fun <T> Edge<T>.next(transition: T): Set<State>? {
 
 abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
 
-    private val states: MutableSet<State> = mutableSetOf(startState)
+    private val _states: MutableSet<State> = mutableSetOf(startState)
+    val states: Set<State>
+        get() = _states
+
     fun addState(state: State): State {
         if (containsState(state)) {
             throw DuplicatedStateException(state)
         }
-        states.add(state)
+        _states.add(state)
         return state
     }
 
     fun getState(stateId: Int): State? {
-        return states.firstOrNull { it.id == stateId }
+        return _states.firstOrNull { it.id == stateId }
     }
 
     fun containsState(state: State): Boolean {
-        return states.firstOrNull { it.id == state.id } != null
+        return _states.firstOrNull { it.id == state.id } != null
     }
 
-    protected open val edges: MutableMap<State, Edge<T?>> = mutableMapOf()
+    @Suppress("PropertyName")
+    protected open val _edges: MutableMap<State, Edge<T?>> = mutableMapOf()
+    val edges: MutableMap<State, Edge<T?>>
+        get() = _edges
 
     fun containsEdge(start: State, transition: T?, endState: State): Boolean {
-        return (edges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id } ?: false
+        return (_edges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id } ?: false
     }
 
     fun trace(string: List<T>, automataStateTracer: AutomataStateTracer<T>) {
@@ -49,8 +55,8 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
             }
         } else {
             val firstCharacter = string.first()
-            val nextStates = edges[currentState]?.next(firstCharacter)
-            val nextStatesWithLambda = edges[currentState]?.next(null)
+            val nextStates = _edges[currentState]?.next(firstCharacter)
+            val nextStatesWithLambda = _edges[currentState]?.next(null)
             if (nextStates.isNullOrEmpty()) {
                 automataStateTracer.onTrap(currentState, string)
             } else {

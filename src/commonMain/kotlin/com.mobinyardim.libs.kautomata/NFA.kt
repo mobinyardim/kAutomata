@@ -13,7 +13,7 @@ class NFA<T : Enum<T>>(
             )
         }
 
-        val stateEdges = edges[startState]?.toMutableMap() ?: mutableMapOf()
+        val stateEdges = _edges[startState]?.toMutableMap() ?: mutableMapOf()
         val newEdges = stateEdges[transition]?.toMutableSet() ?: mutableSetOf()
 
 
@@ -21,11 +21,11 @@ class NFA<T : Enum<T>>(
         newEdges.add(endState)
         stateEdges[transition] = newEdges
 
-        if (edges[startState]?.contains(transition) == true) {
-            edges.remove(startState)
-            edges[startState] = stateEdges
+        if (_edges[startState]?.contains(transition) == true) {
+            _edges.remove(startState)
+            _edges[startState] = stateEdges
         } else {
-            edges[startState] = stateEdges
+            _edges[startState] = stateEdges
         }
     }
 }
