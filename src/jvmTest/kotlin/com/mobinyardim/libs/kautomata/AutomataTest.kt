@@ -90,6 +90,51 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `containsEdge must return false when there is no edge with lambda`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val automata = object : Automata<Language>(state1) {}
+
+        assertThat(
+            automata.containsEdge(state1, null, state1)
+        ).isFalse()
+    }
+
+    @Test
+    fun `containsEdge must return false when there is edge with lambda`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val automata = object : Automata<Language>(state1) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+        automata.addEdge(state1, null, state1)
+
+        assertThat(
+            automata.containsEdge(state1, null, state1)
+        ).isTrue()
+    }
+
+    @Test
     fun `addEdge when edges empty must correctly add edge`() {
         val automata = NFA<Language>()
 
@@ -207,20 +252,22 @@ internal class AutomataTest {
 
         val onStart = mock<() -> Unit> { on { invoke() }.doReturn(Unit) }
 
-        automata.trace("aa".toEnumList(), automataStateTracer = object : AutomataStateTracer<Language> {
-            override fun onStart() {
-                onStart.invoke()
-            }
+        automata.trace(
+            "aa".toEnumList(),
+            automataStateTracer = object : AutomataStateTracer<Language> {
+                override fun onStart() {
+                    onStart.invoke()
+                }
 
-            override fun onCurrentStateChange(state: State) {}
+                override fun onCurrentStateChange(state: State) {}
 
-            override fun onFinalState(state: State) {}
+                override fun onFinalState(state: State) {}
 
-            override fun onTransition(start: State, transition: Language?, endState: State) {}
+                override fun onTransition(start: State, transition: Language?, endState: State) {}
 
-            override fun onTrap(state: State, notConsumedString: List<Language>) {}
+                override fun onTrap(state: State, notConsumedString: List<Language>) {}
 
-        })
+            })
 
         verify(onStart, times(1)).invoke()
     }
@@ -257,24 +304,27 @@ internal class AutomataTest {
         automata.addEdge(state1, transition2, state2)
 
         val onStart = mock<() -> Unit> { on { invoke() }.doReturn(Unit) }
-        val onCurrentStateChange = mock<(state: State) -> Unit> { on { invoke(any()) }.doReturn(Unit) }
+        val onCurrentStateChange =
+            mock<(state: State) -> Unit> { on { invoke(any()) }.doReturn(Unit) }
 
-        automata.trace("aa".toEnumList(), automataStateTracer = object : AutomataStateTracer<Language> {
-            override fun onStart() {
-                onStart.invoke()
-            }
+        automata.trace(
+            "aa".toEnumList(),
+            automataStateTracer = object : AutomataStateTracer<Language> {
+                override fun onStart() {
+                    onStart.invoke()
+                }
 
-            override fun onCurrentStateChange(state: State) {
-                onCurrentStateChange.invoke(state)
-            }
+                override fun onCurrentStateChange(state: State) {
+                    onCurrentStateChange.invoke(state)
+                }
 
-            override fun onFinalState(state: State) {}
+                override fun onFinalState(state: State) {}
 
-            override fun onTransition(start: State, transition: Language?, endState: State) {}
+                override fun onTransition(start: State, transition: Language?, endState: State) {}
 
-            override fun onTrap(state: State, notConsumedString: List<Language>) {}
+                override fun onTrap(state: State, notConsumedString: List<Language>) {}
 
-        })
+            })
 
         verify(onStart, times(1)).invoke()
 
@@ -301,23 +351,25 @@ internal class AutomataTest {
         val onStart = mock<() -> Unit> { on { invoke() }.doReturn(Unit) }
         val onFinalState = mock<(state: State) -> Unit> { on { invoke(any()) }.doReturn(Unit) }
 
-        automata.trace("".toEnumList(), automataStateTracer = object : AutomataStateTracer<Language> {
-            override fun onStart() {
-                onStart.invoke()
-            }
+        automata.trace(
+            "".toEnumList(),
+            automataStateTracer = object : AutomataStateTracer<Language> {
+                override fun onStart() {
+                    onStart.invoke()
+                }
 
-            override fun onCurrentStateChange(state: State) {
-            }
+                override fun onCurrentStateChange(state: State) {
+                }
 
-            override fun onFinalState(state: State) {
-                onFinalState.invoke(state)
-            }
+                override fun onFinalState(state: State) {
+                    onFinalState.invoke(state)
+                }
 
-            override fun onTransition(start: State, transition: Language?, endState: State) {}
+                override fun onTransition(start: State, transition: Language?, endState: State) {}
 
-            override fun onTrap(state: State, notConsumedString: List<Language>) {}
+                override fun onTrap(state: State, notConsumedString: List<Language>) {}
 
-        })
+            })
 
         verify(onStart, times(1)).invoke()
 
@@ -344,24 +396,26 @@ internal class AutomataTest {
         val onStart = mock<() -> Unit> { on { invoke() }.doReturn(Unit) }
         val onTrap = mock<(state: State) -> Unit> { on { invoke(any()) }.doReturn(Unit) }
 
-        automata.trace("".toEnumList(), automataStateTracer = object : AutomataStateTracer<Language> {
-            override fun onStart() {
-                onStart.invoke()
-            }
+        automata.trace(
+            "".toEnumList(),
+            automataStateTracer = object : AutomataStateTracer<Language> {
+                override fun onStart() {
+                    onStart.invoke()
+                }
 
-            override fun onCurrentStateChange(state: State) {
-            }
+                override fun onCurrentStateChange(state: State) {
+                }
 
-            override fun onFinalState(state: State) {
-            }
+                override fun onFinalState(state: State) {
+                }
 
-            override fun onTransition(start: State, transition: Language?, endState: State) {}
+                override fun onTransition(start: State, transition: Language?, endState: State) {}
 
-            override fun onTrap(state: State, notConsumedString: List<Language>) {
-                onTrap.invoke(state)
-            }
+                override fun onTrap(state: State, notConsumedString: List<Language>) {
+                    onTrap.invoke(state)
+                }
 
-        })
+            })
 
         verify(onStart, times(1)).invoke()
 
