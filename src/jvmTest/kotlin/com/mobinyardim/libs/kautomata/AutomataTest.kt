@@ -180,7 +180,13 @@ internal class AutomataTest {
 
     @Test
     fun `addEdge when edges empty must correctly add edge`() {
-        val automata = NFA<Language>()
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -217,7 +223,13 @@ internal class AutomataTest {
 
     @Test
     fun `addEdge when state have edge must add another edge`() {
-        val automata = NFA<Language>()
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
 
         val stateId1 = 1
         val stateName1 = "s1"
