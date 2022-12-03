@@ -22,11 +22,17 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         return _states.firstOrNull { it.id == state.id } != null
     }
 
+    /**
+     * This field used for get next state with transition
+     */
     @Suppress("PropertyName")
     private val _nextEdges: MutableMap<State, Map<T?, Set<State>>> = mutableMapOf()
     val nextEdges: MutableMap<State, Map<T?, Set<State>>>
         get() = _nextEdges
 
+    /**
+     *This field used for get transition between two state
+     **/
     @Suppress("PropertyName")
     private val _edges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
     val edges: Map<State, Map<State, Set<T?>>>
