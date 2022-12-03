@@ -85,11 +85,6 @@ internal class AutomataTest {
     }
 
     @Test
-    fun `containsEdge must return true when edge added to edges field`() {
-        //TODO
-    }
-
-    @Test
     fun `containsEdge must return false when there is no edge with lambda`() {
 
         val stateId1 = 1
@@ -132,6 +127,55 @@ internal class AutomataTest {
         assertThat(
             automata.containsEdge(state1, null, state1)
         ).isTrue()
+    }
+
+    @Test
+    fun `containsEdge must return true when there is edge with not lambda transition`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val automata = object : Automata<Language>(state1) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+        val transition = Language.a
+        automata.addEdge(state1, transition, state1)
+
+        assertThat(
+            automata.containsEdge(state1, transition, state1)
+        ).isTrue()
+
+    }
+
+    @Test
+    fun `containsEdge must return true when there is no edge with not lambda transition`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val automata = object : Automata<Language>(state1) {}
+
+        enumValues<Language>().forEach {
+            assertThat(
+                automata.containsEdge(state1, it, state1)
+            ).isFalse()
+        }
     }
 
     @Test
