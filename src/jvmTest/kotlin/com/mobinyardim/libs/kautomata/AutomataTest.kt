@@ -276,6 +276,72 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `addEdge when add edge to state is not in states must throw exception`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+
+        val transition1 = Language.a
+
+        assertThrows<NoSuchStateException> {
+            automata.addEdge(state1, transition1, state2)
+        }
+    }
+
+    @Test
+    fun `addEdge when add duplicated edge add must throw exception`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        automata.addState(state = state1)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state1)
+
+        assertThrows<DuplicatedEdgeException> {
+            automata.addEdge(state1, transition1, state1)
+        }
+    }
+
+    @Test
     fun `trace when called onStart must call just one time`() {
         val automata = NFA<Language>()
 
