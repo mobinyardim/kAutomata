@@ -1,4 +1,6 @@
-package com.mobinyardim.libs.kautomata
+package com.mobinyardim.libs.kautomata.exceptions
+
+import com.mobinyardim.libs.kautomata.State
 
 class DuplicatedEdgeException(
     startState: State,

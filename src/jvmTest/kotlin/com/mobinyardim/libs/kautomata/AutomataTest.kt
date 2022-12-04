@@ -2,6 +2,9 @@ package com.mobinyardim.libs.kautomata
 
 import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
+import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
+import com.mobinyardim.libs.kautomata.exceptions.DuplicatedStateException
+import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
 import org.junit.jupiter.api.assertThrows
 import org.mockito.kotlin.*
 

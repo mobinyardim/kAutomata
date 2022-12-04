@@ -1,5 +1,9 @@
 package com.mobinyardim.libs.kautomata
 
+import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
+import com.mobinyardim.libs.kautomata.exceptions.DuplicatedStateException
+import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
+
 abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
 
     private val _states: MutableSet<State> = mutableSetOf(startState)
