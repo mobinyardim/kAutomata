@@ -342,6 +342,72 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `removeEdge when remove not lambda edge after remove must edge will be removed`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        automata.addState(state = state1)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state1)
+        assertThat(
+            automata.containsEdge(state1, transition1, state1)
+        ).isTrue()
+
+        automata.removeEdge(state1, transition1, state1)
+        assertThat(
+            automata.containsEdge(state1, transition1, state1)
+        ).isFalse()
+    }
+
+    @Test
+    fun `removeEdge when remove lambda edge after remove must edge will be removed`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        automata.addState(state = state1)
+
+        val transition1 = null
+        automata.addEdge(state1, transition1, state1)
+        assertThat(
+            automata.containsEdge(state1, transition1, state1)
+        ).isTrue()
+
+        automata.removeEdge(state1, transition1, state1)
+        assertThat(
+            automata.containsEdge(state1, transition1, state1)
+        ).isFalse()
+    }
+
+    @Test
     fun `trace when called onStart must call just one time`() {
         val automata = NFA<Language>()
 
