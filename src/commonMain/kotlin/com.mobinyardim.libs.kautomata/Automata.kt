@@ -78,6 +78,27 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
 
     }
 
+    fun removeEdge(startState: State, transition: T?, endState: State) {
+        val startStateEdges = (_nextEdges[startState] ?: mapOf())
+        val newEdges: Map<T?, Set<State>> = mutableMapOf<T?, Set<State>>().apply {
+            startStateEdges.forEach {
+                if (it.key != transition && !it.value.contains(endState)) {
+                    put(it.key, it.value)
+                }
+            }
+        }
+        _nextEdges[startState] = newEdges
+
+        if (_edges[startState]?.get(endState) != null &&
+            _edges[startState]?.get(endState)?.contains(transition) == true
+        ) {
+            val startToEndTransitions = _edges[startState]!![endState] ?: setOf()
+            _edges[startState]!![endState] = startToEndTransitions.filter {
+                it != transition
+            }.toSet()
+        }
+    }
+
     fun containsEdge(start: State, transition: T?, endState: State): Boolean {
         return ((_nextEdges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id }
             ?: false)
