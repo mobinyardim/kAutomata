@@ -408,6 +408,112 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `removeEdge when remove edge with start and lambda transition must all edges deleted`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = false
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        val automata = object : Automata<Language>(state1) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+
+        automata.addState(state = state2)
+
+        val transition = null
+
+        automata.addEdge(state1, transition, state1)
+        assertThat(
+            automata.containsEdge(state1, transition, state1)
+        ).isTrue()
+
+        automata.addEdge(state1, transition, state2)
+        assertThat(
+            automata.containsEdge(state1, transition, state2)
+        ).isTrue()
+
+        automata.removeEdge(state1, transition)
+        assertThat(
+            automata.containsEdge(state1, transition, state1)
+        ).isFalse()
+        assertThat(
+            automata.containsEdge(state1, transition, state2)
+        ).isFalse()
+    }
+
+    @Test
+    fun `removeEdge when remove edge with start and transition must all edges deleted`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = false
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        val automata = object : Automata<Language>(state1) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+
+        automata.addState(state = state2)
+
+        val transition = Language.a
+
+        automata.addEdge(state1, transition, state1)
+        assertThat(
+            automata.containsEdge(state1, transition, state1)
+        ).isTrue()
+
+        automata.addEdge(state1, transition, state2)
+        assertThat(
+            automata.containsEdge(state1, transition, state2)
+        ).isTrue()
+
+        automata.removeEdge(state1, transition)
+        assertThat(
+            automata.containsEdge(state1, transition, state1)
+        ).isFalse()
+        assertThat(
+            automata.containsEdge(state1, transition, state2)
+        ).isFalse()
+    }
+
+    @Test
     fun `trace when called onStart must call just one time`() {
         val automata = NFA<Language>()
 
