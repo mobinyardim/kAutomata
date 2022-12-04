@@ -4,6 +4,8 @@ import org.junit.jupiter.api.Test
 
 import org.junit.jupiter.api.assertThrows
 import com.google.common.truth.Truth.assertThat
+import com.mobinyardim.libs.kautomata.utils.toEnumList
+import com.mobinyardim.libs.kautomata.utils.toText
 
 internal class EnumUtilsKtTest {
 
