@@ -6,10 +6,10 @@ plugins {
 
 val libraryGroupId = "com.mobinyardim.libs"
 val libraryArtifactId = "KAutomata"
-val libraryVersion = "0.1.0-alpha01"
+val libraryVersion = "0.1.0-alpha03"
 
 group = "com.mobinyardim.libs"
-version = "0.1.0-alpha02"
+version = "0.1.0-alpha03"
 
 artifactory {
     setContextUrl("https://inbo.jfrog.io/artifactory")

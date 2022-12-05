@@ -1,4 +1,6 @@
 import com.mobinyardim.libs.kautomata.*
+import com.mobinyardim.libs.kautomata.utils.toEnumList
+import com.mobinyardim.libs.kautomata.utils.toText
 
 fun main() {
 

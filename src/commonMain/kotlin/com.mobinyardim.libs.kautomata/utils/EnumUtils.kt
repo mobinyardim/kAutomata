@@ -1,4 +1,4 @@
-package com.mobinyardim.libs.kautomata
+package com.mobinyardim.libs.kautomata.utils
 
 
 fun <T : Enum<T>> List<T>.toText(): String {
