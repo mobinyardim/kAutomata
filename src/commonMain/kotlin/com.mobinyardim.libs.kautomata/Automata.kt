@@ -197,7 +197,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         states.forEach {
             val incomingEdges = incomingEdges(it, edges)
             val outGoingEdges = outgoingEdges(it, edges)
-            mustReverseEdges += if (incomingEdges.size >= outGoingEdges.size) {
+            mustReverseEdges += if (edgesCount(incomingEdges) >= edgesCount(outGoingEdges)) {
                 outGoingEdges
             } else {
                 incomingEdges
