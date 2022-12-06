@@ -3,6 +3,7 @@ package com.mobinyardim.libs.kautomata
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedStateException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
+import com.mobinyardim.libs.kautomata.utils.removeIf
 
 abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
 
@@ -42,6 +43,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     val edges: Map<State, Map<State, Set<T?>>>
         get() = _edges
 
+    @Suppress("FunctionName")
     protected fun _addEdge(startState: State, transition: T?, endState: State) {
         if (!containsState(startState) || !containsState(endState))
             throw NoSuchStateException()
@@ -179,6 +181,72 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
                 }
             }
         }
+    }
+
+    fun removeCycles(
+        algorithm: RemoveCycleAlgorithm = RemoveCycleAlgorithm.SIMPLE_HEURISTIC
+    ): Map<State, Map<State, Set<T?>>> {
+        return when (algorithm) {
+            RemoveCycleAlgorithm.SIMPLE_HEURISTIC -> removeCyclesSimpleHeuristic()
+        }
+    }
+
+    private fun removeCyclesSimpleHeuristic(): Map<State, Map<State, Set<T?>>> {
+        val edges = _edges
+        val reverseEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
+        states.forEach {
+            val incomingEdges = incomingEdges(it, edges)
+            val outGoingEdges = outgoingEdges(it, edges)
+            reverseEdges += if (incomingEdges.size >= outGoingEdges.size) {
+                outGoingEdges
+            } else {
+                incomingEdges
+            }
+            edges.removeIf { entry ->
+                incomingEdges.contains(entry.key) ||
+                        outGoingEdges.contains(entry.key)
+            }
+        }
+        val newEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
+        _edges.forEach { entry ->
+            val firstState = entry.key
+            entry.value.forEach {
+                val reversedEdge = reverseEdges[firstState]?.get(it.key)
+                if (reversedEdge != null) {
+                    newEdges[it.key] = mutableMapOf<State, Set<T?>>().apply {
+                        put(firstState, reversedEdge)
+                    }
+                } else {
+                    newEdges[firstState] = mutableMapOf<State, Set<T?>>().apply {
+                        put(it.key, it.value)
+                    }
+                }
+            }
+        }
+
+        return newEdges
+    }
+
+    fun incomingEdges(
+        state: State,
+        edges: Map<State, MutableMap<State, Set<T?>>> = _edges
+    ): Map<State, MutableMap<State, Set<T?>>> {
+        return edges.filter {
+            it.key == state
+        }
+    }
+
+    fun outgoingEdges(
+        state: State,
+        edges: Map<State, MutableMap<State, Set<T?>>> = _edges
+    ): Map<State, MutableMap<State, Set<T?>>> {
+        return edges.filterKeys {
+            it != state
+        }
+    }
+
+    enum class RemoveCycleAlgorithm {
+        SIMPLE_HEURISTIC
     }
 }
 
