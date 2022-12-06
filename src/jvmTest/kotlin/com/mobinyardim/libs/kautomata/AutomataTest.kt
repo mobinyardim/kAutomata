@@ -616,6 +616,102 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `outgoingEdges when there is no incoming edge to state must return empty list`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+
+        val transition2 = Language.b
+        automata.addEdge(state1, transition2, state2)
+
+        val outgoingEdges = automata.outgoingEdges(state2)
+
+        assertThat(
+            outgoingEdges.size
+        ).isEqualTo(0)
+    }
+
+    @Test
+    fun `outgoingEdges when there is incoming edge to state must return all edges`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+
+        val transition2 = Language.b
+        automata.addEdge(state1, transition2, state2)
+
+        val outgoingEdges = automata.outgoingEdges(state1)
+
+        assertThat(
+            outgoingEdges[state1]?.get(state2)?.size
+        ).isEqualTo(2)
+
+        assertThat(
+            outgoingEdges[state1]?.get(state2)?.contains(Language.a)
+        ).isTrue()
+
+        assertThat(
+            outgoingEdges[state1]?.get(state2)?.contains(Language.b)
+        ).isTrue()
+    }
+
+    @Test
     fun `trace when called onStart must call just one time`() {
         val automata = NFA<Language>()
 
