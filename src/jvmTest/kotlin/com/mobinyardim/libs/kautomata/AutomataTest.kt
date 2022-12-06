@@ -517,6 +517,19 @@ internal class AutomataTest {
         ).isFalse()
     }
 
+    @Test
+    fun `edgeCount when there is no edge must return 0`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(0)
+    }
 
     @Test
     fun `incomingEdges when there is no incoming edge to state must return empty list`() {
