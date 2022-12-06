@@ -248,7 +248,9 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     fun edgesCount(edges: Map<State, MutableMap<State, Set<T?>>> = _edges): Int {
         var sum = 0
         edges.forEach {
-            sum += it.value.size
+            it.value.forEach {
+                sum += it.value.size
+            }
         }
         return sum
     }
