@@ -569,6 +569,45 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `edgeCount when there is multiple transition between two state must return exact count`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = false
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        val automata = object : Automata<Language>(state1) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        automata.addState(state2)
+        automata.addEdge(state1, Language.a, state2)
+        automata.addEdge(state1, Language.b, state2)
+        automata.addEdge(state1, null, state2)
+
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(3)
+    }
+
+    @Test
     fun `incomingEdges when there is no incoming edge to state must return empty list`() {
         val automata = object : Automata<Language>() {
             fun addEdge(startState: State, transition: Language?, endState: State) {
