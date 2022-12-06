@@ -224,6 +224,26 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
             }
         }
 
+        return reverseEdges(mustReverseEdges.mapValues { it.value.toMap() })
+    }
+
+    private fun reverseEdges(mustReverseEdges: Map<State, Map<State, Set<T?>>>): Map<State, Map<State, Set<T?>>> {
+        val newEdges: MutableMap<State, Map<State, Set<T?>>> = mutableMapOf()
+        _edges.forEach { entry ->
+            val firstState = entry.key
+            entry.value.forEach {
+                val reversedEdge = mustReverseEdges[firstState]?.get(it.key)
+                if (reversedEdge != null) {
+                    newEdges[it.key] = mutableMapOf<State, Set<T?>>().apply {
+                        put(firstState, reversedEdge)
+                    }
+                } else {
+                    newEdges[firstState] = mutableMapOf<State, Set<T?>>().apply {
+                        put(it.key, it.value)
+                    }
+                }
+            }
+        }
         return newEdges
     }
 
