@@ -193,11 +193,11 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
 
     private fun removeCyclesSimpleHeuristic(): Map<State, Map<State, Set<T?>>> {
         val edges = _edges
-        val reverseEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
+        val mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
         states.forEach {
             val incomingEdges = incomingEdges(it, edges)
             val outGoingEdges = outgoingEdges(it, edges)
-            reverseEdges += if (incomingEdges.size >= outGoingEdges.size) {
+            mustReverseEdges += if (incomingEdges.size >= outGoingEdges.size) {
                 outGoingEdges
             } else {
                 incomingEdges
@@ -211,7 +211,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         _edges.forEach { entry ->
             val firstState = entry.key
             entry.value.forEach {
-                val reversedEdge = reverseEdges[firstState]?.get(it.key)
+                val reversedEdge = mustReverseEdges[firstState]?.get(it.key)
                 if (reversedEdge != null) {
                     newEdges[it.key] = mutableMapOf<State, Set<T?>>().apply {
                         put(firstState, reversedEdge)
@@ -241,7 +241,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         edges: Map<State, MutableMap<State, Set<T?>>> = _edges
     ): Map<State, MutableMap<State, Set<T?>>> {
         return edges.filterKeys {
-            it != state
+            it == state
         }
     }
 
