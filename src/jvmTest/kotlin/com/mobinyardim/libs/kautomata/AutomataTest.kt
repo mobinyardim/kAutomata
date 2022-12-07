@@ -881,7 +881,7 @@ internal class AutomataTest {
         automata.addState(state = state2)
 
         val transition0 = Language.a
-        automata.addEdge(state0 , transition0, state1)
+        automata.addEdge(state0, transition0, state1)
 
         val transition1 = Language.a
         automata.addEdge(state1, transition1, state2)
@@ -1200,5 +1200,10 @@ internal class AutomataTest {
             verify(onTrap, times(1)).invoke(capture())
             assertThat(firstValue).isEqualTo(state1)
         }
+    }
+
+    @Test
+    fun `removeCycles when called must automata edges not change`() {
+        //TODO
     }
 }
