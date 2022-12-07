@@ -411,6 +411,78 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `nextEdges must return correct values after add some edge`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        val transition2 = Language.b
+
+        automata.addEdge(state1, transition1, state2)
+        automata.addEdge(state1, transition2, state2)
+
+        assertThat(
+            automata.containsEdge(
+                state1,
+                transition1,
+                state2
+            )
+        ).isTrue()
+
+        assertThat(
+            automata.containsEdge(
+                state1,
+                transition2,
+                state2
+            )
+        ).isTrue()
+
+        val state1NextEdges = automata.nextEdges[state1]
+        assertThat(
+            state1NextEdges?.get(transition1)
+        ).isNotNull()
+
+        assertThat(
+            state1NextEdges?.get(transition1)
+        ).isEqualTo(setOf(state2))
+
+        assertThat(
+            state1NextEdges?.get(transition2)
+        ).isNotNull()
+
+        assertThat(
+            state1NextEdges?.get(transition2)
+        ).isEqualTo(setOf(state2))
+
+    }
+
+    @Test
     fun `removeEdge when remove not lambda edge after remove must edge will be removed`() {
         val automata = object : Automata<Language>() {
             fun addEdge(startState: State, transition: Language?, endState: State) {
