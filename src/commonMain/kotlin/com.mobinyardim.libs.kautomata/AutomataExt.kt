@@ -7,16 +7,20 @@ fun <T : Enum<T>> Automata<T>.reverseEdges(mustReverseEdges: Map<State, Map<Stat
         entry.value.forEach {
             val reversedEdge = mustReverseEdges[firstState]?.get(it.key)
             if (reversedEdge != null && reversedEdge.isNotEmpty()) {
-                newEdges[it.key] = mutableMapOf<State, Set<T?>>().apply {
+                newEdges[it.key] = (newEdges[it.key]?.toMutableMap() ?: mutableMapOf()).apply {
                     put(firstState, reversedEdge)
                 }
-                newEdges[firstState] = mutableMapOf<State, Set<T?>>().apply {
-                    put(it.key, it.value.filter { !reversedEdge.contains(it) }.toSet())
+                if (it.value.any { !reversedEdge.contains(it) }) {
+                    newEdges[firstState] =
+                        (newEdges[firstState]?.toMutableMap() ?: mutableMapOf()).apply {
+                            put(it.key, it.value.filter { !reversedEdge.contains(it) }.toSet())
+                        }
                 }
             } else {
-                newEdges[firstState] = mutableMapOf<State, Set<T?>>().apply {
-                    put(it.key, it.value)
-                }
+                newEdges[firstState] =
+                    (newEdges[firstState]?.toMutableMap() ?: mutableMapOf()).apply {
+                        put(it.key, it.value)
+                    }
             }
         }
     }
