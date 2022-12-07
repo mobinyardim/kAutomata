@@ -207,23 +207,6 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
                         outGoingEdges.contains(entry.key)
             }
         }
-        val newEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
-        _edges.forEach { entry ->
-            val firstState = entry.key
-            entry.value.forEach {
-                val reversedEdge = mustReverseEdges[firstState]?.get(it.key)
-                if (reversedEdge != null) {
-                    newEdges[it.key] = mutableMapOf<State, Set<T?>>().apply {
-                        put(firstState, reversedEdge)
-                    }
-                } else {
-                    newEdges[firstState] = mutableMapOf<State, Set<T?>>().apply {
-                        put(it.key, it.value)
-                    }
-                }
-            }
-        }
-
         return reverseEdges(mustReverseEdges.mapValues { it.value.toMap() })
     }
 
