@@ -72,6 +72,34 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `getState must return exactly the added states`() {
+
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = true
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+        val automata = object : Automata<Language>(state1) {}
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = false
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+        val s2 = automata.addState(state = state2)
+
+        assertThat(s2).isEqualTo(state2)
+        assertThat(automata.states).isEqualTo(setOf(state1, state2))
+    }
+
+    @Test
     fun `getState must return exactly the added state`() {
         val automata = object : Automata<Language>() {}
 
