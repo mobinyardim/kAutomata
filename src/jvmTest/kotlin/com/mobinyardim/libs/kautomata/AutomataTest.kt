@@ -784,10 +784,9 @@ internal class AutomataTest {
         val incomingEdges = automata.incomingEdges(state1)
 
         assertThat(
-            incomingEdges.size
+            automata.edgesCount(incomingEdges)
         ).isEqualTo(0)
     }
-
 
     @Test
     fun `incomingEdges when there is incoming edge to state must return all edges`() {
@@ -829,7 +828,7 @@ internal class AutomataTest {
         val incomingEdges = automata.incomingEdges(state2)
 
         assertThat(
-            incomingEdges[state1]?.get(state2)?.size
+            automata.edgesCount(incomingEdges)
         ).isEqualTo(2)
 
         assertThat(
@@ -838,6 +837,66 @@ internal class AutomataTest {
 
         assertThat(
             incomingEdges[state1]?.get(state2)?.contains(Language.b)
+        ).isTrue()
+    }
+
+    @Test
+    fun `incomingEdges when there is incoming edge  and there is another edges to state must return all edges`() {
+        val stateId0 = 0
+        val stateName0 = "s0"
+        val isFinalState0 = false
+        val state0 = State(
+            id = stateId0,
+            name = stateName0,
+            isFinal = isFinalState0
+        )
+
+        val automata = object : Automata<Language>(state0) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition0 = Language.a
+        automata.addEdge(state0 , transition0, state1)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+
+        val transition2 = Language.a
+        automata.addEdge(state2, transition2, state0)
+
+        val incomingEdges = automata.incomingEdges(state2)
+
+        assertThat(
+            automata.edgesCount(incomingEdges)
+        ).isEqualTo(1)
+
+        assertThat(
+            incomingEdges[state1]?.get(state2)?.contains(transition1)
         ).isTrue()
     }
 
