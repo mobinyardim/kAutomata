@@ -1308,6 +1308,101 @@ internal class AutomataTest {
 
             return automata
         }
+
+        val automataAcyclicEdges = mutableMapOf<State, MutableMap<State, Set<Language>>>().apply {
+            put(
+                a,
+                mutableMapOf(
+                    d to setOf(transition),
+                    b to setOf(transition),
+                    e to setOf(transition),
+                    c to setOf(transition)
+                )
+            )
+
+            put(b, mutableMapOf(h to setOf(transition)))
+
+            put(e, mutableMapOf(c to setOf(transition), g to setOf(transition)))
+
+            put(f, mutableMapOf(g to setOf(transition), e to setOf(transition)))
+
+            put(g, mutableMapOf(c to setOf(transition)))
+
+            put(h, mutableMapOf(f to setOf(transition)))
+        }
+
+        private fun generateAutomataForCycleRemove2(): Automata<Language> {
+            val automata = object : Automata<Language>(a) {
+                fun addEdge(start: State, transition: Language, end: State) {
+                    _addEdge(start, transition, end)
+                }
+            }
+
+            automata.addState(b)
+            automata.addState(c)
+            automata.addState(d)
+            automata.addState(e)
+            automata.addState(f)
+            automata.addState(g)
+            automata.addState(h)
+
+            automata.addEdge(a, transition, d)
+            automata.addEdge(a, transition, b)
+            automata.addEdge(a, transition, e)
+
+            automata.addEdge(b, transition, h)
+
+            automata.addEdge(c, transition, a)
+
+            automata.addEdge(e, transition, c)
+            automata.addEdge(e, transition, g)
+
+            automata.addEdge(f, transition, g)
+            automata.addEdge(f, transition, e)
+
+            automata.addEdge(h, transition, f)
+
+            return automata
+        }
+
+        val automata2AcyclicEdges = mutableMapOf<State, MutableMap<State, Set<Language>>>().apply {
+            put(
+                a,
+                mutableMapOf(
+                    d to setOf(transition),
+                )
+            )
+
+            put(
+                b, mutableMapOf(
+                    h to setOf(transition),
+                    a to setOf(transition)
+                )
+            )
+
+            put(
+                c, mutableMapOf(
+                    a to setOf(transition)
+                )
+            )
+
+            put(
+                e, mutableMapOf(
+                    c to setOf(transition),
+                    a to setOf(transition),
+                    g to setOf(transition)
+                )
+            )
+
+            put(
+                f, mutableMapOf(
+                    g to setOf(transition),
+                    e to setOf(transition)
+                )
+            )
+
+            put(h, mutableMapOf(f to setOf(transition)))
+        }
     }
 
     @Test
@@ -1339,30 +1434,28 @@ internal class AutomataTest {
         assertThat(
             acyclicEdges
         ).isEqualTo(
-            mutableMapOf<State, MutableMap<State, Set<Language>>>().apply {
-                put(
-                    a,
-                    mutableMapOf(
-                        d to setOf(transition),
-                        b to setOf(transition),
-                        e to setOf(transition),
-                        c to setOf(transition)
-                    )
-                )
-
-                put(b, mutableMapOf(h to setOf(transition)))
-
-                put(e, mutableMapOf(c to setOf(transition), g to setOf(transition)))
-
-                put(f, mutableMapOf(g to setOf(transition), e to setOf(transition)))
-
-                put(g, mutableMapOf(c to setOf(transition)))
-
-                put(h, mutableMapOf(f to setOf(transition)))
-            }
+            automataAcyclicEdges
         )
 
     }
 
 
+    @Test
+    fun `removeCycle with depth first algorithm`() {
+        val automata = generateAutomataForCycleRemove2()
+        val acyclicEdges = automata.removeCycles(Automata.RemoveCycleAlgorithm.DEPTH_FIRST_SEARCH)
+
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(
+            automata.edgesCount(acyclicEdges)
+        )
+
+        assertThat(
+            acyclicEdges
+        ).isEqualTo(
+            automata2AcyclicEdges
+        )
+
+    }
 }
