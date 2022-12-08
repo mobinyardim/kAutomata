@@ -188,6 +188,8 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     ): Map<State, Map<State, Set<T?>>> {
         return when (algorithm) {
             RemoveCycleAlgorithm.SIMPLE_HEURISTIC -> removeCyclesSimpleHeuristic()
+            RemoveCycleAlgorithm.ENHANCED_GREEDY_HEURISTIC -> TODO()
+            RemoveCycleAlgorithm.DEPTH_FIRST_SEARCH -> TODO()
         }
     }
 
@@ -241,7 +243,9 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     }
 
     enum class RemoveCycleAlgorithm {
-        SIMPLE_HEURISTIC
+        SIMPLE_HEURISTIC,
+        ENHANCED_GREEDY_HEURISTIC,
+        DEPTH_FIRST_SEARCH
     }
 }
 
