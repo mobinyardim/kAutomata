@@ -17,3 +17,11 @@ fun <T : Enum<T>> removeEdge(
         }.toSet()
     }
 }
+
+fun <T : Enum<T>> copyEdges(edges: MutableMap<State, MutableMap<State, Set<T?>>>): MutableMap<State, MutableMap<State, Set<T?>>> {
+    return edges.mapValues {
+        it.value.mapValues {
+            it.value.toSet()
+        }.toMutableMap()
+    }.toMutableMap()
+}
