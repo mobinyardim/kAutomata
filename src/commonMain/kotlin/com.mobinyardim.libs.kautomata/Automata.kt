@@ -3,6 +3,8 @@ package com.mobinyardim.libs.kautomata
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedStateException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
+import com.mobinyardim.libs.kautomata.utils.copyEdges
+import com.mobinyardim.libs.kautomata.utils.removeEdge
 import com.mobinyardim.libs.kautomata.utils.removeIf
 
 abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
@@ -189,7 +191,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         return when (algorithm) {
             RemoveCycleAlgorithm.SIMPLE_HEURISTIC -> removeCyclesSimpleHeuristic()
             RemoveCycleAlgorithm.ENHANCED_GREEDY_HEURISTIC -> TODO()
-            RemoveCycleAlgorithm.DEPTH_FIRST_SEARCH -> TODO()
+            RemoveCycleAlgorithm.DEPTH_FIRST_SEARCH -> removeCyclesWithDepthFirstSearch()
         }
     }
 
@@ -211,6 +213,75 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
             }
         }
         return reverseEdges(mustReverseEdges.mapValues { it.value.toMap() })
+    }
+
+    private fun removeCyclesWithDepthFirstSearch(): Map<State, Map<State, Set<T?>>> {
+        val edges = copyEdges(_edges)
+
+        val mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
+        val markedStates = mutableSetOf<State>()
+        val stack = mutableListOf<State>()
+
+        states.forEach {
+            removeCyclesWithDepthFirstSearch(
+                state = it,
+                edges = edges,
+                mustReverseEdges = mustReverseEdges,
+                markedStates = markedStates,
+                stack = stack
+            )
+        }
+
+
+        return reverseEdges(mustReverseEdges)
+    }
+
+    private fun removeCyclesWithDepthFirstSearch(
+        state: State,
+        edges: MutableMap<State, MutableMap<State, Set<T?>>>,
+        mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>>,
+        markedStates: MutableSet<State>,
+        stack: MutableList<State>
+    ) {
+        if (markedStates.contains(state)) {
+            return
+        }
+        markedStates.add(state)
+        stack.add(state)
+
+        val incomingEdges = incomingEdges(state)
+
+        incomingEdges.forEach {
+            val w = it.key
+            it.value.forEach {
+                val v = it.key
+                val transitions = it.value
+                if (stack.contains(w)) {
+                    mustReverseEdges[w] = (mustReverseEdges[w] ?: mutableMapOf()).apply {
+                        put(v, transitions)
+                    }
+                    transitions.forEach { transition ->
+                        removeEdge(
+                            edges = edges,
+                            startState = w,
+                            transition = transition,
+                            endState = v
+                        )
+                    }
+                } else {
+                    if (!markedStates.contains(w)) {
+                        removeCyclesWithDepthFirstSearch(
+                            state = w,
+                            edges = edges,
+                            mustReverseEdges = mustReverseEdges,
+                            markedStates = markedStates,
+                            stack = stack
+                        )
+                    }
+                }
+            }
+        }
+        stack.removeAt(stack.size - 1)
     }
 
     fun incomingEdges(
