@@ -1206,4 +1206,83 @@ internal class AutomataTest {
     fun `removeCycles when called must automata edges not change`() {
         //TODO
     }
+
+    @Test
+    fun `removeCycle with heuristic algorithm`() {
+        val a = State(id = 1, name = "a", isFinal = false)
+        val b = State(id = 2, name = "b", isFinal = false)
+        val c = State(id = 3, name = "c", isFinal = false)
+        val d = State(id = 4, name = "d", isFinal = false)
+        val e = State(id = 5, name = "e", isFinal = false)
+        val f = State(id = 6, name = "f", isFinal = false)
+        val g = State(id = 7, name = "g", isFinal = false)
+        val h = State(id = 8, name = "h", isFinal = false)
+
+        val automata = object : Automata<Language>(a) {
+            fun addEdge(start: State, transition: Language, end: State) {
+                _addEdge(start, transition, end)
+            }
+        }
+
+        automata.addState(b)
+        automata.addState(c)
+        automata.addState(d)
+        automata.addState(e)
+        automata.addState(f)
+        automata.addState(g)
+        automata.addState(h)
+
+        val transition = Language.a
+        automata.addEdge(a, transition, d)
+        automata.addEdge(a, transition, b)
+        automata.addEdge(a, transition, e)
+
+        automata.addEdge(b, transition, h)
+
+        automata.addEdge(c, transition, g)
+        automata.addEdge(c, transition, a)
+
+        automata.addEdge(e, transition, c)
+        automata.addEdge(e, transition, g)
+
+        automata.addEdge(f, transition, g)
+        automata.addEdge(f, transition, e)
+
+        automata.addEdge(h, transition, f)
+
+        val acyclicEdges = automata.removeCycles()
+
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(
+            automata.edgesCount(acyclicEdges)
+        )
+
+        assertThat(
+            acyclicEdges
+        ).isEqualTo(
+            mutableMapOf<State, MutableMap<State, Set<Language>>>().apply {
+                put(
+                    a,
+                    mutableMapOf(
+                        d to setOf(transition),
+                        b to setOf(transition),
+                        e to setOf(transition),
+                        c to setOf(transition)
+                    )
+                )
+
+                put(b, mutableMapOf(h to setOf(transition)))
+
+                put(e, mutableMapOf(c to setOf(transition), g to setOf(transition)))
+
+                put(f, mutableMapOf(g to setOf(transition), e to setOf(transition)))
+
+                put(g, mutableMapOf(c to setOf(transition)))
+
+                put(h, mutableMapOf(f to setOf(transition)))
+            }
+        )
+
+    }
 }
