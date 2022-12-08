@@ -219,6 +219,10 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     ): Map<State, MutableMap<State, Set<T?>>> {
         return edges.filter {
             it.key != state && it.value.contains(state)
+        }.mapValues {
+            it.value.filter {
+                it.key == state
+            }.toMutableMap()
         }
     }
 
