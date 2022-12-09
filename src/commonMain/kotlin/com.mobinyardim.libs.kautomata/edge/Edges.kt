@@ -1,7 +1,6 @@
 package com.mobinyardim.libs.kautomata.edge
 
 import com.mobinyardim.libs.kautomata.State
-import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 
 
 open class Edges<T : Enum<T>> {
@@ -69,8 +68,8 @@ open class Edges<T : Enum<T>> {
 
     fun copy(): Edges<T> {
         return MutableEdges<T>().apply {
-            _edges.forEach {
-                this.addEdge(it)
+            this@Edges.edges.forEach {
+                this@apply.addEdge(it)
             }
         }
     }
