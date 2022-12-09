@@ -23,6 +23,27 @@ class MutableEdges<T : Enum<T>> : Edges<T>() {
         return copy()
     }
 
+    override fun hashCode(): Int {
+        return _edges.hashCode()
+    }
+
+    override fun equals(other: Any?): Boolean {
+        return when (other) {
+            is Edges<*> -> {
+                _edges == other.edges
+            }
+            is MutableEdges<*> -> {
+                _edges == other._edges
+            }
+            else -> {
+                super.equals(other)
+            }
+        }
+    }
+
+    /**
+     *Operators
+     **/
     operator fun plusAssign(edges: Edges<T>) {
         edges.edges.forEach {
             if (!contain(it)) {
@@ -47,21 +68,4 @@ class MutableEdges<T : Enum<T>> : Edges<T>() {
         addEdge(edge)
     }
 
-    override fun hashCode(): Int {
-        return _edges.hashCode()
-    }
-
-    override fun equals(other: Any?): Boolean {
-        return when (other) {
-            is Edges<*> -> {
-                _edges == other.edges
-            }
-            is MutableEdges<*> -> {
-                _edges == other._edges
-            }
-            else -> {
-                super.equals(other)
-            }
-        }
-    }
 }
