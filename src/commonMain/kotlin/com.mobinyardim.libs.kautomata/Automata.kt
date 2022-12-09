@@ -3,6 +3,9 @@ package com.mobinyardim.libs.kautomata
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedStateException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
+import com.mobinyardim.libs.kautomata.utils.copyEdges
+import com.mobinyardim.libs.kautomata.utils.removeEdge
+import com.mobinyardim.libs.kautomata.utils.removeIf
 
 abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
 
@@ -42,6 +45,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     val edges: Map<State, Map<State, Set<T?>>>
         get() = _edges
 
+    @Suppress("FunctionName")
     protected fun _addEdge(startState: State, transition: T?, endState: State) {
         if (!containsState(startState) || !containsState(endState))
             throw NoSuchStateException()
@@ -180,7 +184,143 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
             }
         }
     }
-}
 
+    fun removeCycles(
+        algorithm: RemoveCycleAlgorithm = RemoveCycleAlgorithm.SIMPLE_HEURISTIC
+    ): Map<State, Map<State, Set<T?>>> {
+        return when (algorithm) {
+            RemoveCycleAlgorithm.SIMPLE_HEURISTIC -> removeCyclesSimpleHeuristic()
+            RemoveCycleAlgorithm.ENHANCED_GREEDY_HEURISTIC -> TODO()
+            RemoveCycleAlgorithm.DEPTH_FIRST_SEARCH -> removeCyclesWithDepthFirstSearch()
+        }
+    }
+
+    private fun removeCyclesSimpleHeuristic(): Map<State, Map<State, Set<T?>>> {
+        val edges = copyEdges(_edges)
+
+        val mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
+        states.forEach {
+            val incomingEdges = incomingEdges(it, edges)
+            val outGoingEdges = outgoingEdges(it, edges)
+            mustReverseEdges += if (edgesCount(incomingEdges) >= edgesCount(outGoingEdges)) {
+                outGoingEdges
+            } else {
+                incomingEdges
+            }
+            edges.removeIf { entry ->
+                incomingEdges.contains(entry.key) ||
+                        outGoingEdges.contains(entry.key)
+            }
+        }
+        return reverseEdges(mustReverseEdges.mapValues { it.value.toMap() })
+    }
+
+    private fun removeCyclesWithDepthFirstSearch(): Map<State, Map<State, Set<T?>>> {
+        val edges = copyEdges(_edges)
+
+        val mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
+        val markedStates = mutableSetOf<State>()
+        val stack = mutableListOf<State>()
+
+        states.forEach {
+            removeCyclesWithDepthFirstSearch(
+                state = it,
+                edges = edges,
+                mustReverseEdges = mustReverseEdges,
+                markedStates = markedStates,
+                stack = stack
+            )
+        }
+
+
+        return reverseEdges(mustReverseEdges)
+    }
+
+    private fun removeCyclesWithDepthFirstSearch(
+        state: State,
+        edges: MutableMap<State, MutableMap<State, Set<T?>>>,
+        mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>>,
+        markedStates: MutableSet<State>,
+        stack: MutableList<State>
+    ) {
+        if (markedStates.contains(state)) {
+            return
+        }
+        markedStates.add(state)
+        stack.add(state)
+
+        val incomingEdges = incomingEdges(state)
+
+        incomingEdges.forEach {
+            val w = it.key
+            it.value.forEach {
+                val v = it.key
+                val transitions = it.value
+                if (stack.contains(w)) {
+                    mustReverseEdges[w] = (mustReverseEdges[w] ?: mutableMapOf()).apply {
+                        put(v, transitions)
+                    }
+                    transitions.forEach { transition ->
+                        removeEdge(
+                            edges = edges,
+                            startState = w,
+                            transition = transition,
+                            endState = v
+                        )
+                    }
+                } else {
+                    if (!markedStates.contains(w)) {
+                        removeCyclesWithDepthFirstSearch(
+                            state = w,
+                            edges = edges,
+                            mustReverseEdges = mustReverseEdges,
+                            markedStates = markedStates,
+                            stack = stack
+                        )
+                    }
+                }
+            }
+        }
+        stack.removeAt(stack.size - 1)
+    }
+
+    fun incomingEdges(
+        state: State,
+        edges: Map<State, MutableMap<State, Set<T?>>> = _edges
+    ): Map<State, MutableMap<State, Set<T?>>> {
+        return edges.filter {
+            it.value.contains(state)
+        }.mapValues {
+            it.value.filter {
+                it.key == state
+            }.toMutableMap()
+        }
+    }
+
+    fun outgoingEdges(
+        state: State,
+        edges: Map<State, MutableMap<State, Set<T?>>> = _edges
+    ): Map<State, MutableMap<State, Set<T?>>> {
+        return edges.filterKeys {
+            it == state
+        }
+    }
+
+    fun edgesCount(edges: Map<State, Map<State, Set<T?>>> = _edges): Int {
+        var sum = 0
+        edges.forEach {
+            it.value.forEach {
+                sum += it.value.size
+            }
+        }
+        return sum
+    }
+
+    enum class RemoveCycleAlgorithm {
+        SIMPLE_HEURISTIC,
+        ENHANCED_GREEDY_HEURISTIC,
+        DEPTH_FIRST_SEARCH
+    }
+}
 
 

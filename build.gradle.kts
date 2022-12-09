@@ -2,6 +2,7 @@ plugins {
     kotlin("multiplatform") version "1.7.10"
     id("com.jfrog.artifactory") version("4.28.2")
     id("maven-publish")
+    id("org.jetbrains.kotlinx.kover") version "0.6.1" apply(true)
 }
 
 val libraryGroupId = "com.mobinyardim.libs"
@@ -35,6 +36,8 @@ repositories {
 }
 
 kotlin {
+    apply(plugin = "kover")
+
     jvm {
         compilations.all {
             kotlinOptions.jvmTarget = "1.8"

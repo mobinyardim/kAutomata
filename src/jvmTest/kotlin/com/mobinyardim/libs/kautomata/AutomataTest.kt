@@ -72,6 +72,34 @@ internal class AutomataTest {
     }
 
     @Test
+    fun `getState must return exactly the added states`() {
+
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = true
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+        val automata = object : Automata<Language>(state1) {}
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = false
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+        val s2 = automata.addState(state = state2)
+
+        assertThat(s2).isEqualTo(state2)
+        assertThat(automata.states).isEqualTo(setOf(state1, state2))
+    }
+
+    @Test
     fun `getState must return exactly the added state`() {
         val automata = object : Automata<Language>() {}
 
@@ -280,7 +308,44 @@ internal class AutomataTest {
     }
 
     @Test
-    fun `addEdge when add edge to state is not in states must throw exception`() {
+    fun `addEdge when first state is not in automata states must throw exception`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+
+        assertThrows<NoSuchStateException> {
+            automata.addEdge(state1, transition1, state2)
+        }
+    }
+
+    @Test
+    fun `addEdge when end state is not in automata states must throw exception`() {
         val automata = object : Automata<Language>() {
             fun addEdge(startState: State, transition: Language?, endState: State) {
                 _addEdge(
@@ -343,6 +408,78 @@ internal class AutomataTest {
         assertThrows<DuplicatedEdgeException> {
             automata.addEdge(state1, transition1, state1)
         }
+    }
+
+    @Test
+    fun `nextEdges must return correct values after add some edge`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        val transition2 = Language.b
+
+        automata.addEdge(state1, transition1, state2)
+        automata.addEdge(state1, transition2, state2)
+
+        assertThat(
+            automata.containsEdge(
+                state1,
+                transition1,
+                state2
+            )
+        ).isTrue()
+
+        assertThat(
+            automata.containsEdge(
+                state1,
+                transition2,
+                state2
+            )
+        ).isTrue()
+
+        val state1NextEdges = automata.nextEdges[state1]
+        assertThat(
+            state1NextEdges?.get(transition1)
+        ).isNotNull()
+
+        assertThat(
+            state1NextEdges?.get(transition1)
+        ).isEqualTo(setOf(state2))
+
+        assertThat(
+            state1NextEdges?.get(transition2)
+        ).isNotNull()
+
+        assertThat(
+            state1NextEdges?.get(transition2)
+        ).isEqualTo(setOf(state2))
+
     }
 
     @Test
@@ -515,6 +652,409 @@ internal class AutomataTest {
         assertThat(
             automata.containsEdge(state1, transition, state2)
         ).isFalse()
+    }
+
+    @Test
+    fun `edgeCount when there is no edge must return 0`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(0)
+    }
+
+    @Test
+    fun `edgeCount when there is one transition between two state must return 1 `() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = false
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        val automata = object : Automata<Language>(state1) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        automata.addState(state2)
+        automata.addEdge(state1, Language.a, state2)
+
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(1)
+    }
+
+    @Test
+    fun `edgeCount when there is multiple transition between two state must return exact count`() {
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = false
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        val automata = object : Automata<Language>(state1) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        automata.addState(state2)
+        automata.addEdge(state1, Language.a, state2)
+        automata.addEdge(state1, Language.b, state2)
+        automata.addEdge(state1, null, state2)
+
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(3)
+    }
+
+    @Test
+    fun `incomingEdges when there is no incoming edge to state must return empty list`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+
+        val transition2 = Language.b
+        automata.addEdge(state1, transition2, state2)
+
+        val incomingEdges = automata.incomingEdges(state1)
+
+        assertThat(
+            automata.edgesCount(incomingEdges)
+        ).isEqualTo(0)
+    }
+
+    @Test
+    fun `incomingEdges when there is incoming edge to state must return all edges`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+
+        val transition2 = Language.b
+        automata.addEdge(state1, transition2, state2)
+
+        val incomingEdges = automata.incomingEdges(state2)
+
+        assertThat(
+            automata.edgesCount(incomingEdges)
+        ).isEqualTo(2)
+
+        assertThat(
+            incomingEdges[state1]?.get(state2)?.contains(Language.a)
+        ).isTrue()
+
+        assertThat(
+            incomingEdges[state1]?.get(state2)?.contains(Language.b)
+        ).isTrue()
+    }
+
+    @Test
+    fun `incomingEdges when there is incoming edge  and there is another edges to state must return all edges`() {
+        val stateId0 = 0
+        val stateName0 = "s0"
+        val isFinalState0 = false
+        val state0 = State(
+            id = stateId0,
+            name = stateName0,
+            isFinal = isFinalState0
+        )
+
+        val automata = object : Automata<Language>(state0) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition0 = Language.a
+        automata.addEdge(state0, transition0, state1)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+
+        val transition2 = Language.a
+        automata.addEdge(state2, transition2, state0)
+
+        val incomingEdges = automata.incomingEdges(state2)
+
+        assertThat(
+            automata.edgesCount(incomingEdges)
+        ).isEqualTo(1)
+
+        assertThat(
+            incomingEdges[state1]?.get(state2)?.contains(transition1)
+        ).isTrue()
+    }
+
+    @Test
+    fun `incomingEdges when start state has another edges must just return edges with destination of given state`() {
+        val stateId0 = 0
+        val stateName0 = "s0"
+        val isFinalState0 = false
+        val state0 = State(
+            id = stateId0,
+            name = stateName0,
+            isFinal = isFinalState0
+        )
+
+        val automata = object : Automata<Language>(state0) {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition0 = Language.a
+        automata.addEdge(state0, transition0, state1)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+        automata.addEdge(state1, transition1, state0)
+
+        val transition2 = Language.a
+        automata.addEdge(state2, transition2, state0)
+
+        val incomingEdges = automata.incomingEdges(state2)
+
+        assertThat(
+            automata.edgesCount(incomingEdges)
+        ).isEqualTo(1)
+
+        assertThat(
+            incomingEdges[state1]?.get(state2)?.contains(transition1)
+        ).isTrue()
+    }
+
+    @Test
+    fun `outgoingEdges when there is no incoming edge to state must return empty list`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+
+        val transition2 = Language.b
+        automata.addEdge(state1, transition2, state2)
+
+        val outgoingEdges = automata.outgoingEdges(state2)
+
+        assertThat(
+            outgoingEdges.size
+        ).isEqualTo(0)
+    }
+
+    @Test
+    fun `outgoingEdges when there is incoming edge to state must return all edges`() {
+        val automata = object : Automata<Language>() {
+            fun addEdge(startState: State, transition: Language?, endState: State) {
+                _addEdge(
+                    startState, transition, endState
+                )
+            }
+        }
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = true
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        automata.addState(state = state1)
+        automata.addState(state = state2)
+
+        val transition1 = Language.a
+        automata.addEdge(state1, transition1, state2)
+
+        val transition2 = Language.b
+        automata.addEdge(state1, transition2, state2)
+
+        val outgoingEdges = automata.outgoingEdges(state1)
+
+        assertThat(
+            outgoingEdges[state1]?.get(state2)?.size
+        ).isEqualTo(2)
+
+        assertThat(
+            outgoingEdges[state1]?.get(state2)?.contains(Language.a)
+        ).isTrue()
+
+        assertThat(
+            outgoingEdges[state1]?.get(state2)?.contains(Language.b)
+        ).isTrue()
     }
 
     @Test
@@ -721,5 +1261,201 @@ internal class AutomataTest {
             verify(onTrap, times(1)).invoke(capture())
             assertThat(firstValue).isEqualTo(state1)
         }
+    }
+
+    companion object {
+        val a = State(id = 1, name = "a", isFinal = false)
+        val b = State(id = 2, name = "b", isFinal = false)
+        val c = State(id = 3, name = "c", isFinal = false)
+        val d = State(id = 4, name = "d", isFinal = false)
+        val e = State(id = 5, name = "e", isFinal = false)
+        val f = State(id = 6, name = "f", isFinal = false)
+        val g = State(id = 7, name = "g", isFinal = false)
+        val h = State(id = 8, name = "h", isFinal = false)
+        val transition = Language.a
+
+        private fun generateAutomataForCycleRemove(): Automata<Language> {
+            val automata = object : Automata<Language>(a) {
+                fun addEdge(start: State, transition: Language, end: State) {
+                    _addEdge(start, transition, end)
+                }
+            }
+
+            automata.addState(b)
+            automata.addState(c)
+            automata.addState(d)
+            automata.addState(e)
+            automata.addState(f)
+            automata.addState(g)
+            automata.addState(h)
+
+            automata.addEdge(a, transition, d)
+            automata.addEdge(a, transition, b)
+            automata.addEdge(a, transition, e)
+
+            automata.addEdge(b, transition, h)
+
+            automata.addEdge(c, transition, g)
+            automata.addEdge(c, transition, a)
+
+            automata.addEdge(e, transition, c)
+            automata.addEdge(e, transition, g)
+
+            automata.addEdge(f, transition, g)
+            automata.addEdge(f, transition, e)
+
+            automata.addEdge(h, transition, f)
+
+            return automata
+        }
+
+        val automataAcyclicEdges = mutableMapOf<State, MutableMap<State, Set<Language>>>().apply {
+            put(
+                a,
+                mutableMapOf(
+                    d to setOf(transition),
+                    b to setOf(transition),
+                    e to setOf(transition),
+                    c to setOf(transition)
+                )
+            )
+
+            put(b, mutableMapOf(h to setOf(transition)))
+
+            put(e, mutableMapOf(c to setOf(transition), g to setOf(transition)))
+
+            put(f, mutableMapOf(g to setOf(transition), e to setOf(transition)))
+
+            put(g, mutableMapOf(c to setOf(transition)))
+
+            put(h, mutableMapOf(f to setOf(transition)))
+        }
+
+        private fun generateAutomataForCycleRemove2(): Automata<Language> {
+            val automata = object : Automata<Language>(a) {
+                fun addEdge(start: State, transition: Language, end: State) {
+                    _addEdge(start, transition, end)
+                }
+            }
+
+            automata.addState(b)
+            automata.addState(c)
+            automata.addState(d)
+            automata.addState(e)
+            automata.addState(f)
+            automata.addState(g)
+            automata.addState(h)
+
+            automata.addEdge(a, transition, d)
+            automata.addEdge(a, transition, b)
+            automata.addEdge(a, transition, e)
+
+            automata.addEdge(b, transition, h)
+
+            automata.addEdge(c, transition, a)
+
+            automata.addEdge(e, transition, c)
+            automata.addEdge(e, transition, g)
+
+            automata.addEdge(f, transition, g)
+            automata.addEdge(f, transition, e)
+
+            automata.addEdge(h, transition, f)
+
+            return automata
+        }
+
+        val automata2AcyclicEdges = mutableMapOf<State, MutableMap<State, Set<Language>>>().apply {
+            put(
+                a,
+                mutableMapOf(
+                    d to setOf(transition),
+                )
+            )
+
+            put(
+                b, mutableMapOf(
+                    h to setOf(transition),
+                    a to setOf(transition)
+                )
+            )
+
+            put(
+                c, mutableMapOf(
+                    a to setOf(transition)
+                )
+            )
+
+            put(
+                e, mutableMapOf(
+                    c to setOf(transition),
+                    a to setOf(transition),
+                    g to setOf(transition)
+                )
+            )
+
+            put(
+                f, mutableMapOf(
+                    g to setOf(transition),
+                    e to setOf(transition)
+                )
+            )
+
+            put(h, mutableMapOf(f to setOf(transition)))
+        }
+    }
+
+    @Test
+    fun `removeCycles when called must automata edges not change`() {
+        val automata = generateAutomataForCycleRemove()
+        val oldEdges = mutableMapOf<State, Map<State, Set<Language?>>>().apply {
+            putAll(automata.edges)
+        }
+        automata.removeCycles()
+        assertThat(
+            automata.edges
+        ).isEqualTo(
+            oldEdges
+        )
+    }
+
+
+    @Test
+    fun `removeCycle with heuristic algorithm`() {
+        val automata = generateAutomataForCycleRemove()
+        val acyclicEdges = automata.removeCycles()
+
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(
+            automata.edgesCount(acyclicEdges)
+        )
+
+        assertThat(
+            acyclicEdges
+        ).isEqualTo(
+            automataAcyclicEdges
+        )
+
+    }
+
+
+    @Test
+    fun `removeCycle with depth first algorithm`() {
+        val automata = generateAutomataForCycleRemove2()
+        val acyclicEdges = automata.removeCycles(Automata.RemoveCycleAlgorithm.DEPTH_FIRST_SEARCH)
+
+        assertThat(
+            automata.edgesCount()
+        ).isEqualTo(
+            automata.edgesCount(acyclicEdges)
+        )
+
+        assertThat(
+            acyclicEdges
+        ).isEqualTo(
+            automata2AcyclicEdges
+        )
+
     }
 }
