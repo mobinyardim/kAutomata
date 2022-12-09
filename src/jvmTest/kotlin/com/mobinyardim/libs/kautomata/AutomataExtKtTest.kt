@@ -35,11 +35,11 @@ internal class AutomataExtKtTest {
             isFinal = isFinalState2
         )
 
-        fun generateAutomata(): Automata<AutomataTest.Language> {
-            val automata = object : Automata<AutomataTest.Language>(state1) {
+        fun generateAutomata(): Automata<Language> {
+            val automata = object : Automata<Language>(state1) {
                 fun addEdge(
                     startState: State,
-                    transition: AutomataTest.Language?,
+                    transition: Language?,
                     endState: State
                 ) {
                     _addEdge(
@@ -49,18 +49,18 @@ internal class AutomataExtKtTest {
             }
 
             automata.addState(state2)
-            automata.addEdge(state1, AutomataTest.Language.a, state2)
-            automata.addEdge(state1, AutomataTest.Language.b, state2)
+            automata.addEdge(state1, Language.a, state2)
+            automata.addEdge(state1, Language.b, state2)
             automata.addEdge(state1, null, state2)
 
             return automata
         }
 
-        fun generateAutomata2(): Automata<AutomataTest.Language> {
-            val automata = object : Automata<AutomataTest.Language>(state0) {
+        fun generateAutomata2(): Automata<Language> {
+            val automata = object : Automata<Language>(state0) {
                 fun addEdge(
                     startState: State,
-                    transition: AutomataTest.Language?,
+                    transition: Language?,
                     endState: State
                 ) {
                     _addEdge(
@@ -71,8 +71,8 @@ internal class AutomataExtKtTest {
 
             automata.addState(state1)
             automata.addState(state2)
-            automata.addEdge(state0, AutomataTest.Language.a, state1)
-            automata.addEdge(state1, AutomataTest.Language.b, state2)
+            automata.addEdge(state0, Language.a, state1)
+            automata.addEdge(state1, Language.b, state2)
             automata.addEdge(state2, null, state0)
 
             return automata
@@ -96,13 +96,13 @@ internal class AutomataExtKtTest {
     fun `reverseEdges when there is some edges must all edges reversed`() {
         val automata = generateAutomata()
 
-        val edge = mutableMapOf<State, Map<State, Set<AutomataTest.Language?>>>().apply {
-            put(state1, mapOf(state2 to setOf(AutomataTest.Language.b, null)))
-            put(state2, mapOf(state1 to setOf(AutomataTest.Language.a)))
+        val edge = mutableMapOf<State, Map<State, Set<Language?>>>().apply {
+            put(state1, mapOf(state2 to setOf(Language.b, null)))
+            put(state2, mapOf(state1 to setOf(Language.a)))
         }
         val reversedEdges = automata.edges.reverseEdges(
-            MutableEdges<AutomataTest.Language>().apply {
-                addEdge(Edge(start = state1, transition = AutomataTest.Language.a, end = state2))
+            MutableEdges<Language>().apply {
+                addEdge(Edge(start = state1, transition = Language.a, end = state2))
             }
         )
 
@@ -115,19 +115,19 @@ internal class AutomataExtKtTest {
     fun `reverseEdges when incoming and outgoing edge of two state overlapping must all edges reversed`() {
         val automata = generateAutomata2()
 
-        val edge = mutableMapOf<State, Map<State, Set<AutomataTest.Language?>>>().apply {
+        val edge = mutableMapOf<State, Map<State, Set<Language?>>>().apply {
             put(
                 state1,
                 mapOf(
-                    state0 to setOf(AutomataTest.Language.a),
-                    state2 to setOf(AutomataTest.Language.b)
+                    state0 to setOf(Language.a),
+                    state2 to setOf(Language.b)
                 )
             )
             put(state2, mapOf(state0 to setOf(null)))
         }
         val reversedEdges = automata.edges.reverseEdges(
-            MutableEdges<AutomataTest.Language>().apply {
-                addEdge(Edge(start = state0, transition = AutomataTest.Language.a, end = state1))
+            MutableEdges<Language>().apply {
+                addEdge(Edge(start = state0, transition = Language.a, end = state1))
             }
         )
 

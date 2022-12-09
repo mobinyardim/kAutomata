@@ -11,7 +11,7 @@ internal class DFATest {
 
     @Test
     fun `addEdge when edges empty must correctly add edge`() {
-        val automata = DFA<AutomataTest.Language>()
+        val automata = DFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -34,7 +34,7 @@ internal class DFATest {
         automata.addState(state = state1)
         automata.addState(state = state2)
 
-        val transition = AutomataTest.Language.a
+        val transition = Language.a
         automata.addEdge(state1, transition, state2)
 
         Truth.assertThat(
@@ -50,7 +50,7 @@ internal class DFATest {
 
     @Test
     fun `addEdge when state have edge must add another edge`() {
-        val automata = DFA<AutomataTest.Language>()
+        val automata = DFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -73,8 +73,8 @@ internal class DFATest {
         automata.addState(state = state1)
         automata.addState(state = state2)
 
-        val transition1 = AutomataTest.Language.a
-        val transition2 = AutomataTest.Language.b
+        val transition1 = Language.a
+        val transition2 = Language.b
 
         automata.addEdge(state1, transition1, state2)
         automata.addEdge(state1, transition2, state2)
@@ -102,7 +102,7 @@ internal class DFATest {
 
     @Test
     fun `addEdge when add different endState for same transition that has end state old one must be overwritten`() {
-        val automata = DFA<AutomataTest.Language>()
+        val automata = DFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -125,8 +125,8 @@ internal class DFATest {
         automata.addState(state = state1)
         automata.addState(state = state2)
 
-        val transition1 = AutomataTest.Language.a
-        val transition2 = AutomataTest.Language.b
+        val transition1 = Language.a
+        val transition2 = Language.b
 
         automata.addEdge(state1, transition1, state2)
 
@@ -165,7 +165,7 @@ internal class DFATest {
 
     @Test
     fun `addEdge when add edge to state is not in states must throw exception`() {
-        val automata = DFA<AutomataTest.Language>()
+        val automata = DFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -187,7 +187,7 @@ internal class DFATest {
 
         automata.addState(state = state1)
 
-        val transition1 = AutomataTest.Language.a
+        val transition1 = Language.a
 
         assertThrows<NoSuchStateException> {
             automata.addEdge(state1, transition1, state2)
@@ -196,7 +196,7 @@ internal class DFATest {
 
     @Test
     fun `addEdge when add duplicated edge add must throw exception`() {
-        val automata = DFA<AutomataTest.Language>()
+        val automata = DFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -209,7 +209,7 @@ internal class DFATest {
 
         automata.addState(state = state1)
 
-        val transition1 = AutomataTest.Language.a
+        val transition1 = Language.a
         automata.addEdge(state1, transition1, state1)
 
         assertThrows<DuplicatedEdgeException> {
