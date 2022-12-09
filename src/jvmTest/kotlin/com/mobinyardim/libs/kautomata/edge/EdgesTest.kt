@@ -785,4 +785,13 @@ internal class EdgesTest {
         ).isEqualTo(expectedReversedEdges)
     }
 
+    @Test
+    fun `copy must copy all edges`() {
+        val edges = generateEdges()
+        val copyEdges = edges.copy()
+
+        Truth.assertThat(
+            edges.edges
+        ).isEqualTo(copyEdges.edges)
+    }
 }
