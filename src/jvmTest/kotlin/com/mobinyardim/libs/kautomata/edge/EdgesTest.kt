@@ -1,6 +1,7 @@
 package com.mobinyardim.libs.kautomata.edge
 
 import com.google.common.truth.Truth
+import com.mobinyardim.libs.kautomata.Automata
 import com.mobinyardim.libs.kautomata.Language
 import com.mobinyardim.libs.kautomata.State
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
@@ -665,6 +666,123 @@ internal class EdgesTest {
         Truth.assertThat(
             outgoingEdges.contain(edge2)
         ).isTrue()
+    }
+
+    companion object {
+        val stateId0 = 0
+        val stateName0 = "s0"
+        val isFinalState0 = false
+        val state0 = State(
+            id = stateId0,
+            name = stateName0,
+            isFinal = isFinalState0
+        )
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val stateId2 = 2
+        val stateName2 = "s2"
+        val isFinalState2 = false
+        val state2 = State(
+            id = stateId2,
+            name = stateName2,
+            isFinal = isFinalState2
+        )
+
+        fun generateEdges(): Edges<Language> {
+            val edges = MutableEdges<Language>()
+
+            val edge0 = Edge(start = state1, transition = Language.a, end = state2)
+            val edge1 = Edge(start = state1, transition = Language.b, end = state2)
+            val edge2 = Edge<Language>(start = state1, transition = null, end = state2)
+
+            edges.addEdge(edge0)
+            edges.addEdge(edge1)
+            edges.addEdge(edge2)
+
+            return edges
+        }
+
+        fun generateEdges2(): Edges<Language> {
+            val edges = MutableEdges<Language>()
+
+            val edge0 = Edge(start = state0, transition = Language.a, end = state1)
+            val edge1 = Edge(start = state1, transition = Language.b, end = state2)
+            val edge2 = Edge<Language>(start = state2, transition = null, end = state0)
+
+            edges.addEdge(edge0)
+            edges.addEdge(edge1)
+            edges.addEdge(edge2)
+
+            return edges
+        }
+    }
+
+    @Test
+    fun `reverseEdges when there is not must reverse edges must return exact same map`() {
+        val edges = generateEdges()
+
+        val reversedEdges = edges.reverseEdges(MutableEdges())
+
+        Truth.assertThat(
+            reversedEdges
+        ).isEqualTo(edges)
+    }
+
+    @Test
+    fun `reverseEdges when there is some edges must all edges reversed`() {
+        val edges = generateEdges()
+
+        val expectedReversedEdges = MutableEdges<Language>().apply {
+            val edge0 = Edge(start = state2, transition = Language.a, end = state1)
+            val edge1 = Edge(start = state1, transition = Language.b, end = state2)
+            val edge2 = Edge<Language>(start = state1, transition = null, end = state2)
+
+            addEdge(edge0)
+            addEdge(edge1)
+            addEdge(edge2)
+        }
+
+        val reversedEdges = edges.reverseEdges(
+            MutableEdges<Language>().apply {
+                addEdge(Edge(start = state1, transition = Language.a, end = state2))
+            }
+        )
+
+        Truth.assertThat(
+            reversedEdges
+        ).isEqualTo(expectedReversedEdges)
+    }
+
+    @Test
+    fun `reverseEdges when incoming and outgoing edge of two state overlapping must all edges reversed`() {
+        val edges = generateEdges2()
+
+        val expectedReversedEdges = MutableEdges<Language>().apply {
+            val edge0 = Edge(start = state1, transition = Language.a, end = state0)
+            val edge1 = Edge(start = state1, transition = Language.b, end = state2)
+            val edge2 = Edge<Language>(start = state2, transition = null, end = state0)
+
+            addEdge(edge0)
+            addEdge(edge1)
+            addEdge(edge2)
+        }
+        val reversedEdges = edges.reverseEdges(
+            MutableEdges<Language>().apply {
+                addEdge(Edge(start = state0, transition = Language.a, end = state1))
+            }
+        )
+
+        Truth.assertThat(
+            reversedEdges
+        ).isEqualTo(expectedReversedEdges)
     }
 
 }
