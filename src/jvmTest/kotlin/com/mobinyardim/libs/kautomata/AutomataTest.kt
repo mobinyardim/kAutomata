@@ -13,11 +13,6 @@ import org.mockito.kotlin.*
 
 internal class AutomataTest {
 
-    enum class Language {
-        a,
-        b
-    }
-
     @Test
     fun `addState must return exactly added state`() {
         val automata = object : Automata<Language>() {}
