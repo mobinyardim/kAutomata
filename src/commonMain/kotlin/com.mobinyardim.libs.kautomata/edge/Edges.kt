@@ -6,11 +6,18 @@ import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 
 open class Edges<T : Enum<T>> {
 
-
     @Suppress("PropertyName")
     protected val _edges: MutableSet<Edge<T>> = mutableSetOf()
     val edges: Set<Edge<T>>
         get() = _edges
+
+    fun edgesCount(): Int {
+        return edges.size
+    }
+
+    fun contain(edge: Edge<T>): Boolean {
+        return edges.contains(edge)
+    }
 
     fun incomingEdges(state: State): Edges<T> {
         val incomingEdges = MutableEdges<T>()
@@ -32,30 +39,6 @@ open class Edges<T : Enum<T>> {
         return outGoingEdges
     }
 
-    fun copy(): Edges<T> {
-        return MutableEdges<T>().apply {
-            _edges.forEach {
-                this.addEdge(it)
-            }
-        }
-    }
-
-    fun toMutableEdges(): MutableEdges<T> {
-        return MutableEdges<T>().apply {
-            _edges.forEach {
-                this.addEdge(it)
-            }
-        }
-    }
-
-    fun edgesCount(): Int {
-        return edges.size
-    }
-
-    fun contain(edge: Edge<T>): Boolean {
-        return edges.contains(edge)
-    }
-
     fun nextStates(state: State, transition: T?): Set<State> {
         return edges.filter {
             it.start == state && it.transition == transition
@@ -74,6 +57,22 @@ open class Edges<T : Enum<T>> {
             }
         }
         return newEdges
+    }
+
+    fun toMutableEdges(): MutableEdges<T> {
+        return MutableEdges<T>().apply {
+            _edges.forEach {
+                this.addEdge(it)
+            }
+        }
+    }
+
+    fun copy(): Edges<T> {
+        return MutableEdges<T>().apply {
+            _edges.forEach {
+                this.addEdge(it)
+            }
+        }
     }
 
     override fun hashCode(): Int {
