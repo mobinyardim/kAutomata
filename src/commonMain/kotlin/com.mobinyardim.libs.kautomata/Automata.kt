@@ -6,14 +6,18 @@ import com.mobinyardim.libs.kautomata.edge.MutableEdges
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedStateException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
 
-abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
+abstract class Automata<T : Enum<T>>(
+    private val startState: State = State(
+        id = 0, name = "s0", isFinal = false
+    )
+) {
 
     private val _states: MutableSet<State> = mutableSetOf(startState)
     val states: Set<State>
         get() = _states
 
     fun addState(state: State): State {
-        if (containsState(state)) {
+        if (contains(state)) {
             throw DuplicatedStateException(state)
         }
         _states.add(state)
@@ -24,7 +28,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         return _states.firstOrNull { it.id == stateId }
     }
 
-    fun containsState(state: State): Boolean {
+    fun contains(state: State): Boolean {
         return _states.firstOrNull { it.id == state.id } != null
     }
 
@@ -36,14 +40,11 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     @Suppress("FunctionName")
     protected fun _addEdge(startState: State, transition: T?, endState: State) {
 
-        if (!containsState(startState) || !containsState(endState))
-            throw NoSuchStateException()
+        if (!contains(startState) || !contains(endState)) throw NoSuchStateException()
 
         _edges.addEdge(
             Edge(
-                start = startState,
-                transition = transition,
-                end = endState
+                start = startState, transition = transition, end = endState
             )
         )
     }
@@ -55,8 +56,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     fun removeEdge(startState: State, transition: T?) {
         val outgoingEdges = edges.outgoingEdges(startState)
         outgoingEdges.edges.forEach {
-            if (it.transition == transition)
-                _edges.removeEdge(it)
+            if (it.transition == transition) _edges.removeEdge(it)
         }
     }
 
@@ -67,9 +67,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
     }
 
     private fun trace(
-        string: List<T>,
-        automataStateTracer: AutomataStateTracer<T>,
-        currentState: State
+        string: List<T>, automataStateTracer: AutomataStateTracer<T>, currentState: State
     ) {
         automataStateTracer.onCurrentStateChange(currentState)
 
