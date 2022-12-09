@@ -1,6 +1,7 @@
 package com.mobinyardim.libs.kautomata
 
 import com.google.common.truth.Truth
+import com.mobinyardim.libs.kautomata.edge.Edge
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
 import org.junit.jupiter.api.assertThrows
@@ -37,10 +38,12 @@ internal class NFATest {
         automata.addEdge(state1, transition, state2)
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state2
+                )
             )
         ).isTrue()
     }
@@ -77,18 +80,22 @@ internal class NFATest {
         automata.addEdge(state1, transition2, state2)
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition1,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
             )
         ).isTrue()
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition2,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition2,
+                    end = state2
+                )
             )
         ).isTrue()
     }

@@ -2,6 +2,8 @@ package com.mobinyardim.libs.kautomata
 
 import org.junit.jupiter.api.Test
 import com.google.common.truth.Truth.assertThat
+import com.mobinyardim.libs.kautomata.edge.Edge
+import com.mobinyardim.libs.kautomata.edge.MutableEdges
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedStateException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
@@ -131,7 +133,9 @@ internal class AutomataTest {
         val automata = object : Automata<Language>(state1) {}
 
         assertThat(
-            automata.containsEdge(state1, null, state1)
+            automata.edges.contain(
+                Edge(start = state1, transition = null, end = state1)
+            )
         ).isFalse()
     }
 
@@ -157,7 +161,7 @@ internal class AutomataTest {
         automata.addEdge(state1, null, state1)
 
         assertThat(
-            automata.containsEdge(state1, null, state1)
+            automata.edges.contain(Edge(start = state1, transition = null, end = state1))
         ).isTrue()
     }
 
@@ -184,7 +188,7 @@ internal class AutomataTest {
         automata.addEdge(state1, transition, state1)
 
         assertThat(
-            automata.containsEdge(state1, transition, state1)
+            automata.edges.contain(Edge(start = state1, transition = transition, end = state1))
         ).isTrue()
 
     }
@@ -205,7 +209,7 @@ internal class AutomataTest {
 
         enumValues<Language>().forEach {
             assertThat(
-                automata.containsEdge(state1, it, state1)
+                automata.edges.contain(edge = Edge(start = state1, transition = it, end = state1))
             ).isFalse()
         }
     }
@@ -245,10 +249,12 @@ internal class AutomataTest {
         automata.addEdge(state1, transition, state2)
 
         assertThat(
-            automata.containsEdge(
-                state1,
-                transition,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state2
+                )
             )
         ).isTrue()
     }
@@ -291,18 +297,22 @@ internal class AutomataTest {
         automata.addEdge(state1, transition2, state2)
 
         assertThat(
-            automata.containsEdge(
-                state1,
-                transition1,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
             )
         ).isTrue()
 
         assertThat(
-            automata.containsEdge(
-                state1,
-                transition2,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition2,
+                    end = state2
+                )
             )
         ).isTrue()
     }
@@ -448,36 +458,41 @@ internal class AutomataTest {
         automata.addEdge(state1, transition2, state2)
 
         assertThat(
-            automata.containsEdge(
-                state1,
-                transition1,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
             )
         ).isTrue()
 
         assertThat(
-            automata.containsEdge(
-                state1,
-                transition2,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition2,
+                    end = state2
+                )
             )
         ).isTrue()
 
-        val state1NextEdges = automata.nextEdges[state1]
+        val state1NextEdges = automata.edges.nextStates(state1, transition1)
         assertThat(
-            state1NextEdges?.get(transition1)
-        ).isNotNull()
+            state1NextEdges.isNotEmpty()
+        ).isTrue()
 
         assertThat(
-            state1NextEdges?.get(transition1)
+            state1NextEdges
         ).isEqualTo(setOf(state2))
 
+        val state1NextEdges2 = automata.edges.nextStates(state1, transition2)
         assertThat(
-            state1NextEdges?.get(transition2)
-        ).isNotNull()
+            state1NextEdges2.isNotEmpty()
+        ).isTrue()
 
         assertThat(
-            state1NextEdges?.get(transition2)
+            state1NextEdges2
         ).isEqualTo(setOf(state2))
 
     }
@@ -506,12 +521,30 @@ internal class AutomataTest {
         val transition1 = Language.a
         automata.addEdge(state1, transition1, state1)
         assertThat(
-            automata.containsEdge(state1, transition1, state1)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state1
+                )
+            )
         ).isTrue()
 
-        automata.removeEdge(state1, transition1, state1)
+        automata.removeEdge(
+            Edge(
+                start = state1,
+                transition = transition1,
+                end = state1
+            )
+        )
         assertThat(
-            automata.containsEdge(state1, transition1, state1)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state1
+                )
+            )
         ).isFalse()
     }
 
@@ -536,15 +569,17 @@ internal class AutomataTest {
 
         automata.addState(state = state1)
 
-        val transition1 = null
+        val transition1: Language? = null
+        val edge = Edge(start = state1, transition = transition1, end = state1)
         automata.addEdge(state1, transition1, state1)
+
         assertThat(
-            automata.containsEdge(state1, transition1, state1)
+            automata.edges.contain(edge)
         ).isTrue()
 
-        automata.removeEdge(state1, transition1, state1)
+        automata.removeEdge(edge)
         assertThat(
-            automata.containsEdge(state1, transition1, state1)
+            automata.edges.contain(edge)
         ).isFalse()
     }
 
@@ -583,21 +618,46 @@ internal class AutomataTest {
         val transition = null
 
         automata.addEdge(state1, transition, state1)
+
         assertThat(
-            automata.containsEdge(state1, transition, state1)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state1
+                )
+            )
         ).isTrue()
 
         automata.addEdge(state1, transition, state2)
         assertThat(
-            automata.containsEdge(state1, transition, state2)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state2
+                )
+            )
         ).isTrue()
 
         automata.removeEdge(state1, transition)
         assertThat(
-            automata.containsEdge(state1, transition, state1)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state1
+                )
+            )
         ).isFalse()
         assertThat(
-            automata.containsEdge(state1, transition, state2)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state2
+                )
+            )
         ).isFalse()
     }
 
@@ -637,20 +697,45 @@ internal class AutomataTest {
 
         automata.addEdge(state1, transition, state1)
         assertThat(
-            automata.containsEdge(state1, transition, state1)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state1
+                )
+            )
         ).isTrue()
 
         automata.addEdge(state1, transition, state2)
         assertThat(
-            automata.containsEdge(state1, transition, state2)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state2
+                )
+            )
         ).isTrue()
 
         automata.removeEdge(state1, transition)
+
         assertThat(
-            automata.containsEdge(state1, transition, state1)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state1
+                )
+            )
         ).isFalse()
         assertThat(
-            automata.containsEdge(state1, transition, state2)
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state2
+                )
+            )
         ).isFalse()
     }
 
@@ -664,7 +749,7 @@ internal class AutomataTest {
             }
         }
         assertThat(
-            automata.edgesCount()
+            automata.edges.edgesCount()
         ).isEqualTo(0)
     }
 
@@ -701,7 +786,7 @@ internal class AutomataTest {
         automata.addEdge(state1, Language.a, state2)
 
         assertThat(
-            automata.edgesCount()
+            automata.edges.edgesCount()
         ).isEqualTo(1)
     }
 
@@ -740,7 +825,7 @@ internal class AutomataTest {
         automata.addEdge(state1, null, state2)
 
         assertThat(
-            automata.edgesCount()
+            automata.edges.edgesCount()
         ).isEqualTo(3)
     }
 
@@ -781,10 +866,10 @@ internal class AutomataTest {
         val transition2 = Language.b
         automata.addEdge(state1, transition2, state2)
 
-        val incomingEdges = automata.incomingEdges(state1)
+        val incomingEdges = automata.edges.incomingEdges(state1)
 
         assertThat(
-            automata.edgesCount(incomingEdges)
+            incomingEdges.edgesCount()
         ).isEqualTo(0)
     }
 
@@ -825,18 +910,30 @@ internal class AutomataTest {
         val transition2 = Language.b
         automata.addEdge(state1, transition2, state2)
 
-        val incomingEdges = automata.incomingEdges(state2)
+        val incomingEdges = automata.edges.incomingEdges(state2)
 
         assertThat(
-            automata.edgesCount(incomingEdges)
+            incomingEdges.edgesCount()
         ).isEqualTo(2)
 
         assertThat(
-            incomingEdges[state1]?.get(state2)?.contains(Language.a)
+            incomingEdges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
+            )
         ).isTrue()
 
         assertThat(
-            incomingEdges[state1]?.get(state2)?.contains(Language.b)
+            incomingEdges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition2,
+                    end = state2
+                )
+            )
         ).isTrue()
     }
 
@@ -889,14 +986,20 @@ internal class AutomataTest {
         val transition2 = Language.a
         automata.addEdge(state2, transition2, state0)
 
-        val incomingEdges = automata.incomingEdges(state2)
+        val incomingEdges = automata.edges.incomingEdges(state2)
 
         assertThat(
-            automata.edgesCount(incomingEdges)
+            incomingEdges.edgesCount()
         ).isEqualTo(1)
 
         assertThat(
-            incomingEdges[state1]?.get(state2)?.contains(transition1)
+            incomingEdges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
+            )
         ).isTrue()
     }
 
@@ -950,14 +1053,20 @@ internal class AutomataTest {
         val transition2 = Language.a
         automata.addEdge(state2, transition2, state0)
 
-        val incomingEdges = automata.incomingEdges(state2)
+        val incomingEdges = automata.edges.incomingEdges(state2)
 
         assertThat(
-            automata.edgesCount(incomingEdges)
+            incomingEdges.edgesCount()
         ).isEqualTo(1)
 
         assertThat(
-            incomingEdges[state1]?.get(state2)?.contains(transition1)
+            incomingEdges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
+            )
         ).isTrue()
     }
 
@@ -998,10 +1107,10 @@ internal class AutomataTest {
         val transition2 = Language.b
         automata.addEdge(state1, transition2, state2)
 
-        val outgoingEdges = automata.outgoingEdges(state2)
+        val outgoingEdges = automata.edges.outgoingEdges(state2)
 
         assertThat(
-            outgoingEdges.size
+            outgoingEdges.edgesCount()
         ).isEqualTo(0)
     }
 
@@ -1042,18 +1151,30 @@ internal class AutomataTest {
         val transition2 = Language.b
         automata.addEdge(state1, transition2, state2)
 
-        val outgoingEdges = automata.outgoingEdges(state1)
+        val outgoingEdges = automata.edges.outgoingEdges(state1)
 
         assertThat(
-            outgoingEdges[state1]?.get(state2)?.size
+            outgoingEdges.edgesCount()
         ).isEqualTo(2)
 
         assertThat(
-            outgoingEdges[state1]?.get(state2)?.contains(Language.a)
+            outgoingEdges.contain(
+                Edge(
+                    start = state1,
+                    transition = Language.a,
+                    end = state2
+                )
+            )
         ).isTrue()
 
         assertThat(
-            outgoingEdges[state1]?.get(state2)?.contains(Language.b)
+            outgoingEdges.contain(
+                Edge(
+                    start = state1,
+                    transition = Language.b,
+                    end = state2
+                )
+            )
         ).isTrue()
     }
 
@@ -1309,26 +1430,23 @@ internal class AutomataTest {
             return automata
         }
 
-        val automataAcyclicEdges = mutableMapOf<State, MutableMap<State, Set<Language>>>().apply {
-            put(
-                a,
-                mutableMapOf(
-                    d to setOf(transition),
-                    b to setOf(transition),
-                    e to setOf(transition),
-                    c to setOf(transition)
-                )
-            )
+        val automataAcyclicEdges = MutableEdges<Language>().apply {
+            addEdge(Edge(start = a, transition = transition, end = d))
+            addEdge(Edge(start = a, transition = transition, end = b))
+            addEdge(Edge(start = a, transition = transition, end = e))
+            addEdge(Edge(start = a, transition = transition, end = c))
 
-            put(b, mutableMapOf(h to setOf(transition)))
+            addEdge(Edge(start = b, transition = transition, end = h))
 
-            put(e, mutableMapOf(c to setOf(transition), g to setOf(transition)))
+            addEdge(Edge(start = e, transition = transition, end = c))
+            addEdge(Edge(start = e, transition = transition, end = g))
 
-            put(f, mutableMapOf(g to setOf(transition), e to setOf(transition)))
+            addEdge(Edge(start = f, transition = transition, end = g))
+            addEdge(Edge(start = f, transition = transition, end = e))
 
-            put(g, mutableMapOf(c to setOf(transition)))
+            addEdge(Edge(start = g, transition = transition, end = c))
 
-            put(h, mutableMapOf(f to setOf(transition)))
+            addEdge(Edge(start = h, transition = transition, end = f))
         }
 
         private fun generateAutomataForCycleRemove2(): Automata<Language> {
@@ -1365,57 +1483,34 @@ internal class AutomataTest {
             return automata
         }
 
-        val automata2AcyclicEdges = mutableMapOf<State, MutableMap<State, Set<Language>>>().apply {
-            put(
-                a,
-                mutableMapOf(
-                    d to setOf(transition),
-                )
-            )
+        val automata2AcyclicEdges = MutableEdges<Language>().apply {
+            addEdge(Edge(start = a, transition = transition, end = d))
 
-            put(
-                b, mutableMapOf(
-                    h to setOf(transition),
-                    a to setOf(transition)
-                )
-            )
+            addEdge(Edge(start = b, transition = transition, end = h))
+            addEdge(Edge(start = b, transition = transition, end = a))
 
-            put(
-                c, mutableMapOf(
-                    a to setOf(transition)
-                )
-            )
+            addEdge(Edge(start = c, transition = transition, end = a))
 
-            put(
-                e, mutableMapOf(
-                    c to setOf(transition),
-                    a to setOf(transition),
-                    g to setOf(transition)
-                )
-            )
+            addEdge(Edge(start = e, transition = transition, end = c))
+            addEdge(Edge(start = e, transition = transition, end = a))
+            addEdge(Edge(start = e, transition = transition, end = g))
 
-            put(
-                f, mutableMapOf(
-                    g to setOf(transition),
-                    e to setOf(transition)
-                )
-            )
+            addEdge(Edge(start = f, transition = transition, end = g))
+            addEdge(Edge(start = f, transition = transition, end = e))
 
-            put(h, mutableMapOf(f to setOf(transition)))
+            addEdge(Edge(start = h, transition = transition, end = f))
         }
     }
 
     @Test
     fun `removeCycles when called must automata edges not change`() {
         val automata = generateAutomataForCycleRemove()
-        val oldEdges = mutableMapOf<State, Map<State, Set<Language?>>>().apply {
-            putAll(automata.edges)
-        }
+        val oldEdges = automata.edges.copy()
         automata.removeCycles()
         assertThat(
-            automata.edges
+            automata.edges.edges
         ).isEqualTo(
-            oldEdges
+            oldEdges.edges
         )
     }
 
@@ -1426,15 +1521,15 @@ internal class AutomataTest {
         val acyclicEdges = automata.removeCycles()
 
         assertThat(
-            automata.edgesCount()
+            automata.edges.edgesCount()
         ).isEqualTo(
-            automata.edgesCount(acyclicEdges)
+            acyclicEdges.edgesCount()
         )
 
         assertThat(
-            acyclicEdges
+            acyclicEdges.edges
         ).isEqualTo(
-            automataAcyclicEdges
+            automataAcyclicEdges.edges
         )
 
     }
@@ -1446,15 +1541,15 @@ internal class AutomataTest {
         val acyclicEdges = automata.removeCycles(Automata.RemoveCycleAlgorithm.DEPTH_FIRST_SEARCH)
 
         assertThat(
-            automata.edgesCount()
+            automata.edges.edgesCount()
         ).isEqualTo(
-            automata.edgesCount(acyclicEdges)
+            acyclicEdges.edgesCount()
         )
 
         assertThat(
-            acyclicEdges
+            acyclicEdges.edges
         ).isEqualTo(
-            automata2AcyclicEdges
+            automata2AcyclicEdges.edges
         )
 
     }

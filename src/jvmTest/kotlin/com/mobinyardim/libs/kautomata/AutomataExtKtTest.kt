@@ -1,6 +1,8 @@
 package com.mobinyardim.libs.kautomata
 
 import com.google.common.truth.Truth.assertThat
+import com.mobinyardim.libs.kautomata.edge.Edge
+import com.mobinyardim.libs.kautomata.edge.MutableEdges
 import org.junit.jupiter.api.Test
 
 internal class AutomataExtKtTest {
@@ -82,7 +84,7 @@ internal class AutomataExtKtTest {
     fun `reverseEdges when there is not must reverse edges must return exact same map`() {
         val automata = generateAutomata()
 
-        val reversedEdges = automata.reverseEdges(mutableMapOf())
+        val reversedEdges = automata.edges.reverseEdges(MutableEdges())
 
         assertThat(
             reversedEdges
@@ -98,9 +100,9 @@ internal class AutomataExtKtTest {
             put(state1, mapOf(state2 to setOf(AutomataTest.Language.b, null)))
             put(state2, mapOf(state1 to setOf(AutomataTest.Language.a)))
         }
-        val reversedEdges = automata.reverseEdges(
-            mutableMapOf<State, Map<State, Set<AutomataTest.Language?>>>().apply {
-                put(state1, mapOf(state2 to setOf(AutomataTest.Language.a)))
+        val reversedEdges = automata.edges.reverseEdges(
+            MutableEdges<AutomataTest.Language>().apply {
+                addEdge(Edge(start = state1, transition = AutomataTest.Language.a, end = state2))
             }
         )
 
@@ -123,9 +125,9 @@ internal class AutomataExtKtTest {
             )
             put(state2, mapOf(state0 to setOf(null)))
         }
-        val reversedEdges = automata.reverseEdges(
-            mutableMapOf<State, Map<State, Set<AutomataTest.Language?>>>().apply {
-                put(state0, mapOf(state1 to setOf(AutomataTest.Language.a)))
+        val reversedEdges = automata.edges.reverseEdges(
+            MutableEdges<AutomataTest.Language>().apply {
+                addEdge(Edge(start = state0, transition = AutomataTest.Language.a, end = state1))
             }
         )
 

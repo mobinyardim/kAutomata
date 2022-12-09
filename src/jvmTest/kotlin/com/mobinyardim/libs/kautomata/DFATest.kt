@@ -1,12 +1,13 @@
 package com.mobinyardim.libs.kautomata
 
 import com.google.common.truth.Truth
+import com.mobinyardim.libs.kautomata.edge.Edge
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
 import org.junit.jupiter.api.assertThrows
 import org.junit.jupiter.api.Test
 
-internal class DFATest{
+internal class DFATest {
 
     @Test
     fun `addEdge when edges empty must correctly add edge`() {
@@ -37,10 +38,12 @@ internal class DFATest{
         automata.addEdge(state1, transition, state2)
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition,
+                    end = state2
+                )
             )
         ).isTrue()
     }
@@ -77,18 +80,22 @@ internal class DFATest{
         automata.addEdge(state1, transition2, state2)
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition1,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
             )
         ).isTrue()
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition2,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition2,
+                    end = state2
+                )
             )
         ).isTrue()
     }
@@ -124,28 +131,34 @@ internal class DFATest{
         automata.addEdge(state1, transition1, state2)
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition1,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
             )
         ).isTrue()
 
         automata.addEdge(state1, transition1, state1)
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition1,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
             )
         ).isFalse()
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition1,
-                state1
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state1
+                )
             )
         ).isTrue()
     }

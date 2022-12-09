@@ -1,5 +1,6 @@
 package com.mobinyardim.libs.kautomata
 
+import com.mobinyardim.libs.kautomata.edge.Edge
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 
 class DFA<T : Enum<T>>(
@@ -7,7 +8,7 @@ class DFA<T : Enum<T>>(
 ) : Automata<T>(startState) {
 
     fun addEdge(startState: State, transition: T, endState: State) {
-        if (containsEdge(startState, transition, endState)) {
+        if (edges.contain(Edge(start = startState, transition = transition, end = endState))) {
             throw DuplicatedEdgeException(
                 startState, transition.name, endState
             )
