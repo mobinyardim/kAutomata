@@ -1,6 +1,7 @@
 package com.mobinyardim.libs.kautomata.edge
 
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
+import com.mobinyardim.libs.kautomata.exceptions.NoSuchEdgeException
 
 class MutableEdges<T : Enum<T>> : Edges<T>() {
 
@@ -16,6 +17,8 @@ class MutableEdges<T : Enum<T>> : Edges<T>() {
     fun removeEdge(edge: Edge<T>) {
         if (_edges.contains(edge)) {
             _edges.remove(edge)
+        } else {
+            throw NoSuchEdgeException()
         }
     }
 
