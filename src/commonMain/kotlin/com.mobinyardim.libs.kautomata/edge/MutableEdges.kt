@@ -48,7 +48,7 @@ class MutableEdges<T : Enum<T>> : Edges<T>() {
     }
 
     operator fun minusAssign(edge: Edge<T>) {
-        addEdge(edge)
+        removeEdge(edge)
     }
 
 }
