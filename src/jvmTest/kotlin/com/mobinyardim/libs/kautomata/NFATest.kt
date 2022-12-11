@@ -35,16 +35,11 @@ internal class NFATest {
         automata.addState(state = state2)
 
         val transition = Language.a
-        automata.addEdge(state1, transition, state2)
+        val edge = Edge(start = state1, transition = transition, end = state2)
+        automata.addEdge(edge)
 
         Truth.assertThat(
-            automata.edges.contain(
-                Edge(
-                    start = state1,
-                    transition = transition,
-                    end = state2
-                )
-            )
+            automata.edges.contain(edge)
         ).isTrue()
     }
 
@@ -76,8 +71,11 @@ internal class NFATest {
         val transition1 = Language.a
         val transition2 = Language.b
 
-        automata.addEdge(state1, transition1, state2)
-        automata.addEdge(state1, transition2, state2)
+        val edge1 = Edge(start = state1, transition = transition1, end = state2)
+        val edge2 = Edge(start = state1, transition = transition2, end = state2)
+
+        automata.addEdge(edge1)
+        automata.addEdge(edge2)
 
         Truth.assertThat(
             automata.edges.contain(
@@ -127,7 +125,7 @@ internal class NFATest {
         val transition1 = Language.a
 
         assertThrows<NoSuchStateException> {
-            automata.addEdge(state1, transition1, state2)
+            automata.addEdge(Edge(start = state1, transition = transition1, end = state2))
         }
     }
 
@@ -147,10 +145,12 @@ internal class NFATest {
         automata.addState(state = state1)
 
         val transition1 = Language.a
-        automata.addEdge(state1, transition1, state1)
+        val edge1 = Edge(start = state1, transition = transition1, end = state1)
+
+        automata.addEdge(edge1)
 
         assertThrows<DuplicatedEdgeException> {
-            automata.addEdge(state1, transition1, state1)
+            automata.addEdge(edge1)
         }
     }
 }

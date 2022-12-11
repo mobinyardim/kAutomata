@@ -7,21 +7,17 @@ class DFA<T : Enum<T>>(
     startState: State = State(0, "s0", false)
 ) : Automata<T>(startState) {
 
-    fun addEdge(startState: State, transition: T, endState: State) {
-        if (edges.contain(Edge(start = startState, transition = transition, end = endState))) {
+    fun addEdge(edge: Edge<T>) {
+        if (edges.contain(edge)) {
             throw DuplicatedEdgeException(
-                startState, transition.name, endState
+                edge
             )
         }
 
         removeEdge(
-            startState = startState,
-            transition = transition
+            startState = edge.start,
+            transition = edge.transition
         )
-        _addEdge(
-            startState = startState,
-            transition = transition,
-            endState = endState
-        )
+        _addEdge(edge)
     }
 }

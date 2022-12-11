@@ -38,15 +38,11 @@ abstract class Automata<T : Enum<T>>(
         get() = _edges
 
     @Suppress("FunctionName")
-    protected fun _addEdge(startState: State, transition: T?, endState: State) {
+    protected fun _addEdge(edge: Edge<T>) {
 
-        if (!contains(startState) || !contains(endState)) throw NoSuchStateException()
+        if (!contains(edge.start) || !contains(edge.end)) throw NoSuchStateException()
 
-        _edges.addEdge(
-            Edge(
-                start = startState, transition = transition, end = endState
-            )
-        )
+        _edges.addEdge(edge)
     }
 
     fun removeEdge(edge: Edge<T>) {

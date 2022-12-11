@@ -7,9 +7,7 @@ class MutableEdges<T : Enum<T>> : Edges<T>() {
 
     fun addEdge(edge: Edge<T>) {
         if (_edges.contains(edge)) {
-            throw DuplicatedEdgeException(
-                edge.start, edge.transition?.name ?: "lambda", edge.end
-            )
+            throw DuplicatedEdgeException(edge)
         }
         _edges.add(edge)
     }

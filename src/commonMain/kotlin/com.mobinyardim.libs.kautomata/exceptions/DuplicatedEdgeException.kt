@@ -1,9 +1,7 @@
 package com.mobinyardim.libs.kautomata.exceptions
 
-import com.mobinyardim.libs.kautomata.State
+import com.mobinyardim.libs.kautomata.edge.Edge
 
 class DuplicatedEdgeException(
-    startState: State,
-    transition: String,
-    endState: State
-) : Exception("Duplicated edge from ${startState.name} to ${endState.name} with ${transition}!")
+    edge: Edge<*>
+) : Exception("Duplicated edge from ${edge.start.name} to ${edge.end.name} with ${edge.transition?.name ?: "lambda"}!")
