@@ -169,13 +169,13 @@ abstract class Automata<T : Enum<T>>(
         val incomingEdges = edges.incomingEdges(state)
 
         incomingEdges.edges.forEach { edge ->
-            if (stack.contains(edge.end)) {
+            if (stack.contains(edge.start)) {
                 mustReverseEdges += edge
                 edges.removeEdge(edge)
             } else {
-                if (!markedStates.contains(edge.end)) {
+                if (!markedStates.contains(edge.start)) {
                     removeCyclesWithDepthFirstSearch(
-                        state = edge.end,
+                        state = edge.start,
                         edges = edges,
                         mustReverseEdges = mustReverseEdges,
                         markedStates = markedStates,
