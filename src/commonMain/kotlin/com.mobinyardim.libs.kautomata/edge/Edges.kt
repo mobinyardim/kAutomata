@@ -60,8 +60,8 @@ open class Edges<T : Enum<T>> {
 
     fun toMutableEdges(): MutableEdges<T> {
         return MutableEdges<T>().apply {
-            _edges.forEach {
-                this.addEdge(it)
+            this@Edges._edges.forEach {
+                this@apply.addEdge(it)
             }
         }
     }
