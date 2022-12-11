@@ -89,9 +89,6 @@ open class Edges<T : Enum<T>> constructor() {
             is Edges<*> -> {
                 _edges == other._edges
             }
-            is MutableEdges<*> -> {
-                _edges == other._edges
-            }
             else -> {
                 super.equals(other)
             }
