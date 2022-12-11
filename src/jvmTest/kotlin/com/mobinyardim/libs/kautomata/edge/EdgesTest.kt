@@ -1,10 +1,10 @@
 package com.mobinyardim.libs.kautomata.edge
 
 import com.google.common.truth.Truth
-import com.mobinyardim.libs.kautomata.Automata
 import com.mobinyardim.libs.kautomata.Language
 import com.mobinyardim.libs.kautomata.State
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
+import com.mobinyardim.libs.kautomata.exceptions.NoSuchEdgeException
 import org.junit.jupiter.api.Test
 import org.junit.jupiter.api.assertThrows
 
@@ -302,6 +302,27 @@ internal class EdgesTest {
         Truth.assertThat(
             edges.contain(edge)
         ).isFalse()
+    }
+
+    @Test
+    fun `removeEdge when there is not such edge`() {
+        val edges = MutableEdges<Language>()
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+        val transition1: Language? = null
+        val edge = Edge(start = state1, transition = transition1, end = state1)
+
+        assertThrows<NoSuchEdgeException> {
+            edges.removeEdge(edge)
+        }
     }
 
     @Test
