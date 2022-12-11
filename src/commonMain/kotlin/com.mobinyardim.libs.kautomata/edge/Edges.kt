@@ -3,7 +3,13 @@ package com.mobinyardim.libs.kautomata.edge
 import com.mobinyardim.libs.kautomata.State
 
 
-open class Edges<T : Enum<T>> {
+open class Edges<T : Enum<T>> constructor() {
+
+    constructor(edges: Set<Edge<T>>) : this() {
+        edges.forEach {
+            _edges.add(it)
+        }
+    }
 
     @Suppress("PropertyName")
     protected val _edges: MutableSet<Edge<T>> = mutableSetOf()
