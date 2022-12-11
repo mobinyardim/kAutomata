@@ -710,8 +710,7 @@ internal class AutomataTest {
 
             automata.addEdge(f, transition, g)
             automata.addEdge(f, transition, e)
-
-            automata.addEdge(h, transition, f)
+            automata.addEdge(f, transition, h)
 
             return automata
         }
@@ -725,14 +724,13 @@ internal class AutomataTest {
             addEdge(Edge(start = b, transition = transition, end = h))
 
             addEdge(Edge(start = e, transition = transition, end = c))
-            addEdge(Edge(start = e, transition = transition, end = g))
 
+            addEdge(Edge(start = f, transition = transition, end = h))
             addEdge(Edge(start = f, transition = transition, end = g))
             addEdge(Edge(start = f, transition = transition, end = e))
 
             addEdge(Edge(start = g, transition = transition, end = c))
-
-            addEdge(Edge(start = h, transition = transition, end = f))
+            addEdge(Edge(start = g, transition = transition, end = e))
         }
 
         private fun generateAutomataForCycleRemove2(): Automata<Language> {
@@ -803,7 +801,7 @@ internal class AutomataTest {
     }
 
 
-    /* @Test
+     @Test
      fun `removeCycle with heuristic algorithm`() {
          val automata = generateAutomataForCycleRemove()
          val acyclicEdges = automata.removeCycles()
@@ -840,5 +838,5 @@ internal class AutomataTest {
              automata2AcyclicEdges.edges
          )
 
-     }*/
+     }
 }
