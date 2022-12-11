@@ -20,7 +20,7 @@ class MutableEdges<T : Enum<T>> : Edges<T>() {
     }
 
     fun toEdge(): Edges<T> {
-        return copy()
+        return Edges(edges)
     }
 
     /**
