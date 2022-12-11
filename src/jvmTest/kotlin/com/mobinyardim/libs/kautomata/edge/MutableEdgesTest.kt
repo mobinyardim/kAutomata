@@ -109,6 +109,42 @@ internal class MutableEdgesTest {
     }
 
     @Test
+    fun `addEdge when there is edge between two state and add another edge must two edges available`() {
+        val edges = MutableEdges<Language>()
+
+        val stateId1 = 1
+        val stateName1 = "s1"
+        val isFinalState1 = false
+        val state1 = State(
+            id = stateId1,
+            name = stateName1,
+            isFinal = isFinalState1
+        )
+
+
+        val transition1 = Language.a
+        val transition2 = Language.b
+
+        val edge1 = Edge(start = state1, transition = transition1, end = state1)
+        val edge2 = Edge(start = state1, transition = transition2, end = state1)
+
+        edges.addEdge(edge1)
+        edges.addEdge(edge2)
+
+        Truth.assertThat(
+            edges.edgesCount()
+        ).isEqualTo(2)
+
+        Truth.assertThat(
+            edges.contain(edge1)
+        ).isTrue()
+
+        Truth.assertThat(
+            edges.contain(edge2)
+        ).isTrue()
+    }
+
+    @Test
     fun `removeEdge when remove not lambda edge after remove must edge will be removed`() {
         val edges = MutableEdges<Language>()
 
