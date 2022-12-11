@@ -77,7 +77,7 @@ open class Edges<T : Enum<T>> constructor() {
             this@Edges.edges.forEach {
                 this@apply.addEdge(it)
             }
-        }
+        }.toEdge()
     }
 
     override fun hashCode(): Int {
