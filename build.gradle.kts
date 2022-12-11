@@ -1,8 +1,8 @@
 plugins {
     kotlin("multiplatform") version "1.7.10"
-    id("com.jfrog.artifactory") version("4.28.2")
+    id("com.jfrog.artifactory") version ("4.28.2")
     id("maven-publish")
-    id("org.jetbrains.kotlinx.kover") version "0.6.1" apply(true)
+    id("org.jetbrains.kotlinx.kover") version "0.6.1" apply (true)
 }
 
 val libraryGroupId = "com.mobinyardim.libs"
@@ -76,8 +76,8 @@ kotlin {
         val commonTest by getting {
             dependencies {
                 implementation(kotlin("test"))
-                implementation ("com.google.truth:truth:1.1.3")
-                implementation ("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
+                implementation("com.google.truth:truth:1.1.3")
+                implementation("org.jetbrains.kotlin:kotlin-reflect:1.7.10")
                 implementation("org.mockito.kotlin:mockito-kotlin:4.0.0")
             }
         }
@@ -93,7 +93,7 @@ kotlin {
     publishing {
         publications {
             afterEvaluate {
-                create<MavenPublication>("kAutomata"){
+                create<MavenPublication>("kAutomata") {
                     groupId = libraryGroupId
                     artifactId = libraryArtifactId
                     version = libraryVersion
@@ -119,6 +119,13 @@ kotlin {
     }
 }
 
+kover {
+    filters {
+        classes {
+            excludes += listOf("Main*", "Language")
+        }
+    }
+}
 
 tasks.register(name = "runNativeApp", type = Exec::class) {
     group = "run"
@@ -127,7 +134,7 @@ tasks.register(name = "runNativeApp", type = Exec::class) {
     commandLine(
         if (System.getProperty("os.name").toLowerCase().contains("windows")) {
             "${project.name}.exe"
-        } else{
+        } else {
             "./${project.name}.kexe"
         }
     )

@@ -1,20 +1,23 @@
 package com.mobinyardim.libs.kautomata
 
-import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
+import com.mobinyardim.libs.kautomata.edge.Edge
+import com.mobinyardim.libs.kautomata.edge.Edges
+import com.mobinyardim.libs.kautomata.edge.MutableEdges
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedStateException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
-import com.mobinyardim.libs.kautomata.utils.copyEdges
-import com.mobinyardim.libs.kautomata.utils.removeEdge
-import com.mobinyardim.libs.kautomata.utils.removeIf
 
-abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s0", false)) {
+abstract class Automata<T : Enum<T>>(
+    private val startState: State = State(
+        id = 0, name = "s0", isFinal = false
+    )
+) {
 
     private val _states: MutableSet<State> = mutableSetOf(startState)
     val states: Set<State>
         get() = _states
 
     fun addState(state: State): State {
-        if (containsState(state)) {
+        if (contains(state)) {
             throw DuplicatedStateException(state)
         }
         _states.add(state)
@@ -25,115 +28,32 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         return _states.firstOrNull { it.id == stateId }
     }
 
-    fun containsState(state: State): Boolean {
+    fun contains(state: State): Boolean {
         return _states.firstOrNull { it.id == state.id } != null
     }
 
-    /**
-     * This field used for get next state with transition
-     */
     @Suppress("PropertyName")
-    private val _nextEdges: MutableMap<State, Map<T?, Set<State>>> = mutableMapOf()
-    val nextEdges: MutableMap<State, Map<T?, Set<State>>>
-        get() = _nextEdges
-
-    /**
-     *This field used for get transition between two state
-     **/
-    @Suppress("PropertyName")
-    private val _edges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
-    val edges: Map<State, Map<State, Set<T?>>>
+    protected val _edges: MutableEdges<T> = MutableEdges()
+    val edges: Edges<T>
         get() = _edges
 
     @Suppress("FunctionName")
-    protected fun _addEdge(startState: State, transition: T?, endState: State) {
-        if (!containsState(startState) || !containsState(endState))
-            throw NoSuchStateException()
+    protected fun _addEdge(edge: Edge<T>) {
 
-        if (containsEdge(startState, transition, endState)) {
-            throw DuplicatedEdgeException(
-                startState, transition?.name ?: "lambda", endState
-            )
-        }
+        if (!contains(edge.start) || !contains(edge.end)) throw NoSuchStateException()
 
-        val stateOutgoingEdges = _nextEdges[startState]?.toMutableMap() ?: mutableMapOf()
-        val newOutGoingEdges = stateOutgoingEdges[transition]?.toMutableSet() ?: mutableSetOf()
-
-
-
-        newOutGoingEdges.add(endState)
-        stateOutgoingEdges[transition] = newOutGoingEdges
-
-        if (_nextEdges[startState]?.contains(transition) == true) {
-            _nextEdges.remove(startState)
-            _nextEdges[startState] = stateOutgoingEdges
-        } else {
-            _nextEdges[startState] = stateOutgoingEdges
-        }
-
-        val startStateEdges = _edges[startState] ?: mutableMapOf()
-        val startStateToEndStateEdges = startStateEdges[endState]?.toMutableSet() ?: mutableSetOf()
-
-        startStateToEndStateEdges.add(transition)
-
-        if (_edges.contains(startState)) {
-            _edges[startState]!![endState] = startStateToEndStateEdges
-        } else {
-            _edges[startState] = mutableMapOf<State, Set<T?>>().apply {
-                put(endState, startStateToEndStateEdges)
-            }
-        }
-
+        _edges.addEdge(edge)
     }
 
-    fun removeEdge(startState: State, transition: T?, endState: State) {
-        val startStateEdges = (_nextEdges[startState] ?: mapOf())
-        val newEdges: Map<T?, Set<State>> = mutableMapOf<T?, Set<State>>().apply {
-            startStateEdges.forEach {
-                if (it.key != transition && !it.value.contains(endState)) {
-                    put(it.key, it.value)
-                }
-            }
-        }
-        _nextEdges[startState] = newEdges
-
-        if (_edges[startState]?.get(endState) != null &&
-            _edges[startState]?.get(endState)?.contains(transition) == true
-        ) {
-            val startToEndTransitions = _edges[startState]!![endState] ?: setOf()
-            _edges[startState]!![endState] = startToEndTransitions.filter {
-                it != transition
-            }.toSet()
-        }
+    fun removeEdge(edge: Edge<T>) {
+        _edges.removeEdge(edge)
     }
 
     fun removeEdge(startState: State, transition: T?) {
-        val startStateEdges = (_nextEdges[startState] ?: mapOf())
-        val newNextEdges: Map<T?, Set<State>> = mutableMapOf<T?, Set<State>>().apply {
-            startStateEdges.forEach {
-                if (it.key != transition) {
-                    put(it.key, it.value)
-                }
-            }
+        val outgoingEdges = edges.outgoingEdges(startState)
+        outgoingEdges.edges.forEach {
+            if (it.transition == transition) _edges.removeEdge(it)
         }
-        _nextEdges[startState] = newNextEdges
-
-        val newEdges = _edges[startState]?.mapValues {
-            if (!it.value.contains(transition))
-                it.value
-            else {
-                it.value.filter {
-                    it != transition
-                }.toSet()
-            }
-        } ?: mapOf()
-        _edges[startState] = newEdges.toMutableMap()
-    }
-
-    fun containsEdge(start: State, transition: T?, endState: State): Boolean {
-        return ((_nextEdges[start] ?: mutableMapOf())[transition]?.any { endState.id == it.id }
-            ?: false)
-                && (_edges[start]?.get(endState)?.contains(transition) ?: false)
     }
 
     fun trace(string: List<T>, automataStateTracer: AutomataStateTracer<T>) {
@@ -142,11 +62,8 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         trace(string, automataStateTracer, startState)
     }
 
-
     private fun trace(
-        string: List<T>,
-        automataStateTracer: AutomataStateTracer<T>,
-        currentState: State
+        string: List<T>, automataStateTracer: AutomataStateTracer<T>, currentState: State
     ) {
         automataStateTracer.onCurrentStateChange(currentState)
 
@@ -158,9 +75,10 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
             }
         } else {
             val firstCharacter = string.first()
-            val nextStates = _nextEdges[currentState]?.get(firstCharacter)
-            val nextStatesWithLambda = _nextEdges[currentState]?.get(null)
-            if (nextStates.isNullOrEmpty()) {
+            val nextStates = edges.nextStates(currentState, firstCharacter)
+            val nextStatesWithLambda = edges.nextStates(currentState, null)
+
+            if (nextStates.isEmpty()) {
                 automataStateTracer.onTrap(currentState, string)
             } else {
                 nextStates.forEach {
@@ -172,7 +90,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
                     )
                 }
             }
-            if (!nextStatesWithLambda.isNullOrEmpty()) {
+            if (nextStatesWithLambda.isNotEmpty()) {
                 nextStatesWithLambda.forEach {
                     automataStateTracer.onTransition(currentState, null, it)
                     trace(
@@ -187,7 +105,7 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
 
     fun removeCycles(
         algorithm: RemoveCycleAlgorithm = RemoveCycleAlgorithm.SIMPLE_HEURISTIC
-    ): Map<State, Map<State, Set<T?>>> {
+    ): Edges<T> {
         return when (algorithm) {
             RemoveCycleAlgorithm.SIMPLE_HEURISTIC -> removeCyclesSimpleHeuristic()
             RemoveCycleAlgorithm.ENHANCED_GREEDY_HEURISTIC -> TODO()
@@ -195,30 +113,29 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         }
     }
 
-    private fun removeCyclesSimpleHeuristic(): Map<State, Map<State, Set<T?>>> {
-        val edges = copyEdges(_edges)
+    private fun removeCyclesSimpleHeuristic(): Edges<T> {
+        val edges = _edges.copy().toMutableEdges()
 
-        val mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
+        val mustReverseEdges = MutableEdges<T>()
         states.forEach {
-            val incomingEdges = incomingEdges(it, edges)
-            val outGoingEdges = outgoingEdges(it, edges)
-            mustReverseEdges += if (edgesCount(incomingEdges) >= edgesCount(outGoingEdges)) {
+            val incomingEdges = edges.incomingEdges(it)
+            val outGoingEdges = edges.outgoingEdges(it)
+            mustReverseEdges += if (incomingEdges.edgesCount() >= outGoingEdges.edgesCount()) {
                 outGoingEdges
             } else {
                 incomingEdges
             }
-            edges.removeIf { entry ->
-                incomingEdges.contains(entry.key) ||
-                        outGoingEdges.contains(entry.key)
-            }
+
+            edges -= incomingEdges
+            edges -= outGoingEdges
         }
-        return reverseEdges(mustReverseEdges.mapValues { it.value.toMap() })
+        return _edges.reverseEdges(mustReverseEdges)
     }
 
-    private fun removeCyclesWithDepthFirstSearch(): Map<State, Map<State, Set<T?>>> {
-        val edges = copyEdges(_edges)
+    private fun removeCyclesWithDepthFirstSearch(): Edges<T> {
+        val edges = _edges.copy().toMutableEdges()
 
-        val mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>> = mutableMapOf()
+        val mustReverseEdges = MutableEdges<T>()
         val markedStates = mutableSetOf<State>()
         val stack = mutableListOf<State>()
 
@@ -233,13 +150,13 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         }
 
 
-        return reverseEdges(mustReverseEdges)
+        return _edges.reverseEdges(mustReverseEdges)
     }
 
     private fun removeCyclesWithDepthFirstSearch(
         state: State,
-        edges: MutableMap<State, MutableMap<State, Set<T?>>>,
-        mustReverseEdges: MutableMap<State, MutableMap<State, Set<T?>>>,
+        edges: MutableEdges<T>,
+        mustReverseEdges: MutableEdges<T>,
         markedStates: MutableSet<State>,
         stack: MutableList<State>
     ) {
@@ -249,71 +166,26 @@ abstract class Automata<T : Enum<T>>(private val startState: State = State(0, "s
         markedStates.add(state)
         stack.add(state)
 
-        val incomingEdges = incomingEdges(state)
+        val incomingEdges = edges.incomingEdges(state)
 
-        incomingEdges.forEach {
-            val w = it.key
-            it.value.forEach {
-                val v = it.key
-                val transitions = it.value
-                if (stack.contains(w)) {
-                    mustReverseEdges[w] = (mustReverseEdges[w] ?: mutableMapOf()).apply {
-                        put(v, transitions)
-                    }
-                    transitions.forEach { transition ->
-                        removeEdge(
-                            edges = edges,
-                            startState = w,
-                            transition = transition,
-                            endState = v
-                        )
-                    }
-                } else {
-                    if (!markedStates.contains(w)) {
-                        removeCyclesWithDepthFirstSearch(
-                            state = w,
-                            edges = edges,
-                            mustReverseEdges = mustReverseEdges,
-                            markedStates = markedStates,
-                            stack = stack
-                        )
-                    }
+        incomingEdges.edges.forEach { edge ->
+            if (stack.contains(edge.start)) {
+                mustReverseEdges += edge
+                edges.removeEdge(edge)
+            } else {
+                if (!markedStates.contains(edge.start)) {
+                    removeCyclesWithDepthFirstSearch(
+                        state = edge.start,
+                        edges = edges,
+                        mustReverseEdges = mustReverseEdges,
+                        markedStates = markedStates,
+                        stack = stack
+                    )
                 }
             }
+
         }
         stack.removeAt(stack.size - 1)
-    }
-
-    fun incomingEdges(
-        state: State,
-        edges: Map<State, MutableMap<State, Set<T?>>> = _edges
-    ): Map<State, MutableMap<State, Set<T?>>> {
-        return edges.filter {
-            it.value.contains(state)
-        }.mapValues {
-            it.value.filter {
-                it.key == state
-            }.toMutableMap()
-        }
-    }
-
-    fun outgoingEdges(
-        state: State,
-        edges: Map<State, MutableMap<State, Set<T?>>> = _edges
-    ): Map<State, MutableMap<State, Set<T?>>> {
-        return edges.filterKeys {
-            it == state
-        }
-    }
-
-    fun edgesCount(edges: Map<State, Map<State, Set<T?>>> = _edges): Int {
-        var sum = 0
-        edges.forEach {
-            it.value.forEach {
-                sum += it.value.size
-            }
-        }
-        return sum
     }
 
     enum class RemoveCycleAlgorithm {

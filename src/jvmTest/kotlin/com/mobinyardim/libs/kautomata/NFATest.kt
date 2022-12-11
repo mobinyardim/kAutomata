@@ -1,6 +1,7 @@
 package com.mobinyardim.libs.kautomata
 
 import com.google.common.truth.Truth
+import com.mobinyardim.libs.kautomata.edge.Edge
 import com.mobinyardim.libs.kautomata.exceptions.DuplicatedEdgeException
 import com.mobinyardim.libs.kautomata.exceptions.NoSuchStateException
 import org.junit.jupiter.api.assertThrows
@@ -10,7 +11,7 @@ internal class NFATest {
 
     @Test
     fun `addEdge when edges empty must correctly add edge`() {
-        val automata = NFA<AutomataTest.Language>()
+        val automata = NFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -33,21 +34,18 @@ internal class NFATest {
         automata.addState(state = state1)
         automata.addState(state = state2)
 
-        val transition = AutomataTest.Language.a
-        automata.addEdge(state1, transition, state2)
+        val transition = Language.a
+        val edge = Edge(start = state1, transition = transition, end = state2)
+        automata.addEdge(edge)
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition,
-                state2
-            )
+            automata.edges.contain(edge)
         ).isTrue()
     }
 
     @Test
     fun `addEdge when state have edge must add another edge`() {
-        val automata = NFA<AutomataTest.Language>()
+        val automata = NFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -70,32 +68,39 @@ internal class NFATest {
         automata.addState(state = state1)
         automata.addState(state = state2)
 
-        val transition1 = AutomataTest.Language.a
-        val transition2 = AutomataTest.Language.b
+        val transition1 = Language.a
+        val transition2 = Language.b
 
-        automata.addEdge(state1, transition1, state2)
-        automata.addEdge(state1, transition2, state2)
+        val edge1 = Edge(start = state1, transition = transition1, end = state2)
+        val edge2 = Edge(start = state1, transition = transition2, end = state2)
+
+        automata.addEdge(edge1)
+        automata.addEdge(edge2)
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition1,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition1,
+                    end = state2
+                )
             )
         ).isTrue()
 
         Truth.assertThat(
-            automata.containsEdge(
-                state1,
-                transition2,
-                state2
+            automata.edges.contain(
+                Edge(
+                    start = state1,
+                    transition = transition2,
+                    end = state2
+                )
             )
         ).isTrue()
     }
 
     @Test
     fun `addEdge when add edge to state is not in states must throw exception`() {
-        val automata = NFA<AutomataTest.Language>()
+        val automata = NFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -117,16 +122,16 @@ internal class NFATest {
 
         automata.addState(state = state1)
 
-        val transition1 = AutomataTest.Language.a
+        val transition1 = Language.a
 
         assertThrows<NoSuchStateException> {
-            automata.addEdge(state1, transition1, state2)
+            automata.addEdge(Edge(start = state1, transition = transition1, end = state2))
         }
     }
 
     @Test
     fun `addEdge when add duplicated edge add must throw exception`() {
-        val automata = NFA<AutomataTest.Language>()
+        val automata = NFA<Language>()
 
         val stateId1 = 1
         val stateName1 = "s1"
@@ -139,11 +144,13 @@ internal class NFATest {
 
         automata.addState(state = state1)
 
-        val transition1 = AutomataTest.Language.a
-        automata.addEdge(state1, transition1, state1)
+        val transition1 = Language.a
+        val edge1 = Edge(start = state1, transition = transition1, end = state1)
+
+        automata.addEdge(edge1)
 
         assertThrows<DuplicatedEdgeException> {
-            automata.addEdge(state1, transition1, state1)
+            automata.addEdge(edge1)
         }
     }
 }
