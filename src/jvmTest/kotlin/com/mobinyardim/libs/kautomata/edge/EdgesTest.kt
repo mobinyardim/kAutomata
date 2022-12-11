@@ -707,7 +707,7 @@ internal class EdgesTest {
             edges.addEdge(edge1)
             edges.addEdge(edge2)
 
-            return edges
+            return edges.toEdge()
         }
 
         fun generateEdges2(): Edges<Language> {
@@ -721,7 +721,7 @@ internal class EdgesTest {
             edges.addEdge(edge1)
             edges.addEdge(edge2)
 
-            return edges
+            return edges.toEdge()
         }
     }
 
@@ -793,5 +793,135 @@ internal class EdgesTest {
         Truth.assertThat(
             edges.edges
         ).isEqualTo(copyEdges.edges)
+    }
+
+    @Test
+    fun `toMutableEdges must copy all edges`() {
+        val edges = generateEdges()
+        val copyEdges = edges.toMutableEdges()
+
+        Truth.assertThat(
+            copyEdges.edges
+        ).isEqualTo(edges.edges)
+    }
+
+    @Test
+    fun `isEqualOperator when compare two equal edges must return true`() {
+        val edges1 = generateEdges()
+        val edges2 = generateEdges()
+
+        Truth.assertThat(
+            edges1 == edges2
+        ).isTrue()
+    }
+
+    @Test
+    fun `isEqualOperator when compare two not equal edges must return true`() {
+        val edges1 = generateEdges()
+        val edges2 = generateEdges2()
+
+        Truth.assertThat(
+            edges1 == edges2
+        ).isFalse()
+    }
+
+    @Test
+    fun `isEqualOperator when compare mutable edges with edges with equal value must return true`() {
+        val edges1 = generateEdges().toMutableEdges()
+        val edges2 = generateEdges().toMutableEdges()
+
+        Truth.assertThat(
+            edges1 == edges2
+        ).isTrue()
+    }
+
+    @Test
+    fun `isEqualOperator when compare mutable edges with edges with not equal value must return true`() {
+        val edges1 = generateEdges().toMutableEdges()
+        val edges2 = generateEdges2().toMutableEdges()
+
+        Truth.assertThat(
+            edges1 == edges2
+        ).isFalse()
+    }
+
+    @Test
+    fun `isEqualOperator when compare mutable edge with edges s with not equal value must return true`() {
+        val edges1 = generateEdges().toMutableEdges()
+        val edges2 = generateEdges2()
+
+        Truth.assertThat(
+            edges1 == edges2
+        ).isFalse()
+    }
+
+    @Test
+    fun `isEqualOperator when compare edge with mutable edges s with not equal value must return true`() {
+        val edges1 = generateEdges()
+        val edges2 = generateEdges2().toMutableEdges()
+
+        Truth.assertThat(
+            edges1 == edges2
+        ).isFalse()
+    }
+
+    @Test
+    fun `isEqualOperator when compare edge with another object must return false`() {
+        val edges1 = generateEdges()
+
+        Truth.assertThat(
+            edges1.equals("")
+        ).isFalse()
+    }
+
+
+    @Test
+    fun `hashCode two object is edges and equal return true`() {
+        val edges1 = generateEdges()
+        val edges2 = generateEdges()
+
+        Truth.assertThat(
+            edges1.hashCode() == edges2.hashCode()
+        ).isTrue()
+    }
+
+    @Test
+    fun `hashCode two object is edges and not equal return true`() {
+        val edges1 = generateEdges()
+        val edges2 = generateEdges2()
+
+        Truth.assertThat(
+            edges1.hashCode() == edges2.hashCode()
+        ).isFalse()
+    }
+
+    @Test
+    fun `hashCode two object is mutable edges and equal return true`() {
+        val edges1 = generateEdges().toMutableEdges()
+        val edges2 = generateEdges().toMutableEdges()
+
+        Truth.assertThat(
+            edges1.hashCode() == edges2.hashCode()
+        ).isTrue()
+    }
+
+    @Test
+    fun `hashCode two object is mutable edges and not equal return true`() {
+        val edges1 = generateEdges().toMutableEdges()
+        val edges2 = generateEdges2().toMutableEdges()
+
+        Truth.assertThat(
+            edges1.hashCode() == edges2.hashCode()
+        ).isFalse()
+    }
+
+    @Test
+    fun `hashCode when one object is edges and another is edges return true`() {
+        val edges1 = generateEdges().toMutableEdges()
+        val edges2 = generateEdges2()
+
+        Truth.assertThat(
+            edges1.hashCode() == edges2.hashCode()
+        ).isFalse()
     }
 }
